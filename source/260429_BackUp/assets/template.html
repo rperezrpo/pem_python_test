@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Bear Attack Cost-Benefit Model</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+__STYLES__
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Ursus &middot; Cost-Benefit Model</div>
+      <h1>To <em>protect</em>,<br>or to compensate?</h1>
+      <p class="subtitle">An interactive analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages, evaluated over a multi-year horizon.</p>
+    </div>
+    <div class="verdict">
+      <div class="verdict-label" id="verdict-label">Net Cumulative Outcome</div>
+      <div class="verdict-value" id="verdict-value">—</div>
+      <div class="verdict-detail" id="verdict-detail">&nbsp;</div>
+    </div>
+  </header>
+
+  <!-- General Context -->
+  <section class="panel">
+    <div class="panel-head-row">
+      <div>
+        <h2 class="panel-title">General context</h2>
+        <div class="panel-sub">Bear pressure &middot; environment &middot; protective measure &middot; time horizon</div>
+      </div>
+      <button class="reset-btn" id="reset-all">Reset all to defaults</button>
+    </div>
+    <div class="general-grid" id="general-grid"></div>
+  </section>
+
+  <!-- Per-element panels -->
+  <section class="element-board" id="element-board"></section>
+
+  <!-- Results -->
+  <main class="results">
+    <div id="element-cards"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">Overall cost-benefit over time</h2>
+        <span class="card-sub" id="overall-card-sub">Cumulative · EUR</span>
+      </div>
+      <div class="chart-box tall">
+        <canvas id="overallChart"></canvas>
+      </div>
+      <details>
+        <summary>Show formulas used</summary>
+        <div class="formula">
+          <b>1. Encounter rate λ (encounters per year)</b><br>
+          <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year in the surrounding area; P(B) and P(E|B) translate that into the probability of an actual encounter; food and density modifiers tune the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
+          λ = I_y &middot; P(B) &middot; P(E|B) &middot; food &middot; density<br><br>
+
+          <b>2. Element-level encounter rate</b><br>
+          <span class="formula-note">The total encounter rate is split across the three element types according to the attack share s_i, which represents the fraction of bear visits targeting each element type.</span><br>
+          λ_i = λ &middot; s_i<br><br>
+
+          <b>3. Annual loss without protection</b><br>
+          <span class="formula-note">Each encounter targeting element i causes damage with probability P(D_i|B,E), and a damaging event takes u_i units. Expected units damaged per year is therefore P(D_i|B,E) · λ_i · u_i, capped by the available stock N_i — you can't lose more than you have.</span><br>
+          loss_i^noprot = min( P(D_i|B,E) &middot; λ_i &middot; u_i ,  N_i ) &middot; c_i<br><br>
+
+          <b>4. Annual cost with protection (covering a share s_prot_i of N_i units)</b><br>
+          <span class="formula-note">Protection splits the stock into N_unprot = (1 &minus; s_prot_i) &middot; N_i unprotected units and N_prot = s_prot_i &middot; N_i protected units. The bear's damaging "appetite" P(D_i|B,E) &middot; λ_i &middot; u_i is split between the two pools in proportion to their share of stock: fraction (1 &minus; s_prot_i) of attempts target unprotected units and always succeed; fraction s_prot_i target protected units and succeed only when the measure has failed (P(¬M_j)). Each pool is then capped by its own available stock. At s_prot_i = 0 the unprotected term reduces to the no-protection loss in step 3.</span><br><br>
+
+          <span class="formula-sub">Losses from unprotected units &mdash;</span> appetite share (1 &minus; s_prot_i) hits this pool, capped by N_unprot.<br>
+          unprot_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; (1 &minus; s_prot_i) ,  N_unprot ) &middot; c_i<br><br>
+
+          <span class="formula-sub">Losses from non-maintained infrastructure (measure fails) &mdash;</span> appetite share s_prot_i reaches the protected pool but only succeeds with probability P(¬M_j); capped by N_prot.<br>
+          residual_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; s_prot_i &middot; P(¬M_j) ,  N_prot ) &middot; c_i<br><br>
+
+          <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional.<br>
+          maint_i/yr = c_maintenance_j &middot; N_i &middot; s_prot_i<br><br>
+
+          <span class="formula-sub">Installation (per cycle) &mdash;</span> paid upfront when the measure is deployed, and re-paid every lifespan_j years when the measure reaches end-of-life and is replaced.<br>
+          install_i = c_install_i &middot; N_i &middot; s_prot_i<br><br>
+
+          <b>5. Cumulative cost over T years</b><br>
+          <span class="formula-note">Without protection, cumulative cost grows linearly: T years of compensation. With protection, installation is paid in year 0 and re-paid every lifespan_j years (the chart shows step jumps at each re-investment). Each year between installations adds maintenance plus residual plus unprotected exposure. The crossover year — when the protected line drops below the unprotected one — is the payback period.</span><br>
+          C_noprot(T) = T &middot; Σ loss_i^noprot<br>
+          C_prot(T)   = (1 + ⌊T / lifespan_j⌋) &middot; Σ install_i + T &middot; Σ (unprot_i + residual_i + maint_i/yr)<br><br>
+
+          <b>Net benefit at T</b><br>
+          Net(T) = C_noprot(T) &minus; C_prot(T)
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <div class="footer">
+    Generated from bear_attack_model_variables.xlsx &middot; Adjust sliders to model your scenario &middot; All values in EUR
+  </div>
+</div>
+
+<script>
+__SCRIPT__
+</script>
+</body>
+</html>
