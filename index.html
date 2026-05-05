@@ -48,7 +48,7 @@
 
     --bg:           #f7f0dc;
     --panel:        #fffaea;
-    --panel-2:      #f0e6c8;
+    --panel-2:      #d5e2d1;
     --ink:          #221f16;
     --ink-dim:      #6e6754;
     --ink-strong:   #14110a;
@@ -77,6 +77,67 @@
       radial-gradient(ellipse at top right, rgba(212,160,74,0.05), transparent 50%),
       radial-gradient(ellipse at bottom left, rgba(107,142,90,0.06), transparent 50%);
     min-height: 100vh;
+  }
+  /* ====== Site header (sticky nav bar) ====== */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .site-header-inner {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: stretch;
+    height: 52px;
+    gap: 0;
+  }
+  .site-brand {
+    display: flex;
+    align-items: center;
+    padding-right: 28px;
+    border-right: 1px solid var(--line);
+    margin-right: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .site-header .eyebrow {
+    margin-bottom: 0;
+  }
+  .site-header .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    padding-left: 16px;
+  }
+  .site-header .tabs {
+    border-bottom: none;
+    margin-bottom: 0;
+    gap: 0;
+    align-items: stretch;
+    flex: 1;
+  }
+  .site-header .tabs button {
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 0 18px;
+    height: 100%;
+    background: transparent;
+  }
+  .site-header .tabs button:hover {
+    border-bottom-color: var(--accent);
+    color: var(--ink);
+  }
+  .site-header .tabs button.active {
+    border-bottom-color: var(--accent);
+    background: transparent;
+    color: var(--accent);
   }
   .wrap {
     max-width: 1500px;
@@ -130,14 +191,40 @@
     align-items: flex-end;
     gap: 18px;
   }
+  .header-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .guide-btn {
+    display: inline-flex;
+    align-items: center;
+    background: color-mix(in srgb, var(--element-small) 40%, transparent);
+    border: 1px solid var(--element-small);
+    color: var(--ink);
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    border-radius: 3px;
+  }
+  .guide-btn:hover {
+    border-color: var(--ink-strong);
+    color: var(--ink-strong);
+  }
+  .guide-btn.active {
+    border-color: var(--element-small);
+    color: var(--bg);
+    background: color-mix(in srgb, var(--element-small) 70%, transparent);
+  }
   .theme-toggle {
-    position: absolute;
-    top: 0;
-    right: 0;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--panel-2);
+    background: var(--panel);
     border: 1px solid var(--line);
     color: var(--ink);
     padding: 10px 14px;
@@ -183,6 +270,135 @@
     font-size: 12px;
     color: var(--ink-dim);
     margin-top: 6px;
+  }
+
+  /* ====== Tabs / pages ====== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tabs button {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-bottom: none;
+    color: var(--ink-dim);
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px 3px 0 0;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .tabs button:hover {
+    color: var(--ink);
+    border-color: var(--accent);
+  }
+  .tabs button.active {
+    color: var(--accent);
+    background: var(--panel);
+    border-bottom-color: var(--panel);
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ====== Guide page ====== */
+  .guide-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .card-body {
+    padding: 0 24px 20px;
+  }
+  .card-body p {
+    margin: 0 0 12px;
+    color: var(--ink-dim);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body strong { color: var(--ink); font-weight: 600; }
+  .card-body code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--panel-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  /* ====== Variables table page ====== */
+  .variables-table-wrap {
+    overflow-x: auto;
+  }
+  #variables-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  #variables-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    border-bottom: 1px solid var(--line);
+    font-weight: 500;
+  }
+  #variables-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--ink);
+  }
+  #variables-table td.mono {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  #variables-table td.value-cell {
+    text-align: right;
+  }
+  #variables-table tr.readonly td.mono,
+  #variables-table tr.readonly td.mono .mono-text {
+    color: var(--ink-dim);
+  }
+  #variables-table td.desc {
+    color: var(--ink-dim);
+    max-width: 640px;
+  }
+  #variables-table tbody tr:hover td {
+    background: var(--panel-2);
+  }
+  #variables-table input.var-input {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 4px 8px;
+    width: 110px;
+    text-align: right;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  #variables-table input.var-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  #variables-table input.var-input::-webkit-outer-spin-button,
+  #variables-table input.var-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
   }
 
   .panel {
@@ -480,12 +696,12 @@
   /* ====== element results: table on left, chart on right ====== */
   .element-results-grid {
     display: grid;
-    grid-template-columns: 480px 1fr;
+    grid-template-columns: 480px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
   }
   @media (max-width: 1100px) {
-    .element-results-grid { grid-template-columns: 1fr; }
+    .element-results-grid { grid-template-columns: minmax(0, 1fr); }
   }
 
   .summary-table {
@@ -587,7 +803,7 @@
     font-size: 12px;
   }
 
-  .chart-box { position: relative; height: 360px; }
+  .chart-box { position: relative; height: 360px; min-width: 0; }
   .chart-box.tall { height: 440px; }
 
   .footer {
@@ -672,18 +888,31 @@
 </head>
 <body>
 
-<div class="wrap">
-  <header>
-    <div>
-      <div class="eyebrow">Ursus &middot; Cost-Benefit Model</div>
-      <h1>To <em>protect</em>,<br>or to compensate?</h1>
-      <p class="subtitle">An interactive analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages, evaluated over a multi-year horizon.</p>
-    </div>
-    <div class="header-side">
+<div class="site-header">
+  <div class="site-header-inner">
+    <span class="eyebrow site-brand">Ursus &middot; Cost-Benefit Model</span>
+    <nav class="tabs" role="tablist">
+      <button type="button" data-page="table">Data Source</button>
+      <button type="button" data-page="simple">Simple Model</button>
+      <button type="button" data-page="complete">Complete Model</button>
+    </nav>
+    <div class="header-controls">
+      <button class="guide-btn active" id="guide-btn" type="button" data-page="guide">Guide</button>
       <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
         <span class="theme-toggle-icon" aria-hidden="true"></span>
         <span class="theme-toggle-text">Theme: Dark</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>To <em>protect</em>,<br>or to compensate?</h1>
+      <p class="subtitle">An interactive cost benefit analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages.</p>
+    </div>
+    <div class="header-side">
       <div class="verdict">
       <div class="verdict-label" id="verdict-label">Net Cumulative Outcome</div>
       <div class="verdict-value" id="verdict-value">—</div>
@@ -692,74 +921,223 @@
     </div>
   </header>
 
-  <!-- General Context -->
-  <section class="panel">
-    <div class="panel-head-row">
-      <div>
-        <h2 class="panel-title">General context</h2>
-        <div class="panel-sub">Time horizon &middot; bear pressure &middot; protective measure &middot; encounter distribution</div>
-      </div>
-      <button class="reset-btn" id="reset-all">Reset all to defaults</button>
-    </div>
-    <div class="general-grid" id="general-grid"></div>
-  </section>
-
-  <!-- Per-element panels -->
-  <section class="element-board" id="element-board"></section>
-
-  <!-- Results -->
-  <main class="results">
-    <div id="element-cards"></div>
-
+  <!-- Page: Variables table -->
+  <section class="page" id="page-table">
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title">Overall cost-benefit over time</h2>
-        <span class="card-sub" id="overall-card-sub">Per-year · EUR</span>
+        <h2 class="card-title">Model variables</h2>
+        <span class="card-sub">Sourced from bear_attack_model_variables.xlsx</span>
       </div>
-      <div class="chart-box tall">
-        <canvas id="overallChart"></canvas>
+      <div class="variables-table-wrap">
+        <table id="variables-table">
+          <thead>
+            <tr><th>Name</th><th>Notation</th><th>Value</th><th>Description</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <details>
-        <summary>Show formulas used</summary>
-        <div class="formula">
-          <b>1. Encounter rate λ (encounters per year)</b><br>
-          <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year in the surrounding area; P(B) and P(E|B) translate that into the probability of an actual encounter; food and density modifiers tune the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
-          λ = I_y &middot; P(B) &middot; P(E|B) &middot; food &middot; density<br><br>
-
-          <b>2. Element-level encounter rate</b><br>
-          <span class="formula-note">The total encounter rate is split across the three element types according to the attack share s_i, which represents the fraction of bear visits targeting each element type.</span><br>
-          λ_i = λ &middot; s_i<br><br>
-
-          <b>3. Annual loss without protection</b><br>
-          <span class="formula-note">Each encounter targeting element i causes damage with probability P(D_i|B,E), and a damaging event takes u_i units. Expected units damaged per year is therefore P(D_i|B,E) · λ_i · u_i, capped by the available stock N_i — you can't lose more than you have.</span><br>
-          loss_i^noprot = min( P(D_i|B,E) &middot; λ_i &middot; u_i ,  N_i ) &middot; c_i<br><br>
-
-          <b>4. Annual cost with protection (covering a share s_prot_i of N_i units)</b><br>
-          <span class="formula-note">Protection splits the stock into N_unprot = (1 &minus; s_prot_i) &middot; N_i unprotected units and N_prot = s_prot_i &middot; N_i protected units. The bear's damaging "appetite" P(D_i|B,E) &middot; λ_i &middot; u_i is split between the two pools in proportion to their share of stock: fraction (1 &minus; s_prot_i) of attempts target unprotected units and always succeed; fraction s_prot_i target protected units and succeed only when the measure has failed (P(¬M_j)). Each pool is then capped by its own available stock. At s_prot_i = 0 the unprotected term reduces to the no-protection loss in step 3.</span><br><br>
-
-          <span class="formula-sub">Losses from unprotected units &mdash;</span> appetite share (1 &minus; s_prot_i) hits this pool, capped by N_unprot.<br>
-          unprot_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; (1 &minus; s_prot_i) ,  N_unprot ) &middot; c_i<br><br>
-
-          <span class="formula-sub">Losses from non-maintained infrastructure (measure fails) &mdash;</span> appetite share s_prot_i reaches the protected pool but only succeeds with probability P(¬M_j); capped by N_prot.<br>
-          residual_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; s_prot_i &middot; P(¬M_j) ,  N_prot ) &middot; c_i<br><br>
-
-          <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional.<br>
-          maint_i/yr = c_maintenance_j &middot; N_i &middot; s_prot_i<br><br>
-
-          <span class="formula-sub">Installation (per cycle) &mdash;</span> paid upfront when the measure is deployed, and re-paid every lifespan_j years when the measure reaches end-of-life and is replaced.<br>
-          install_i = c_install_i &middot; N_i &middot; s_prot_i<br><br>
-
-          <b>5. Cumulative cost over T years</b><br>
-          <span class="formula-note">Without protection, cumulative cost grows linearly: T years of compensation. With protection, installation is paid in year 0 and re-paid every lifespan_j years (the chart shows step jumps at each re-investment). Each year between installations adds maintenance plus residual plus unprotected exposure. The crossover year — when the protected line drops below the unprotected one — is the payback period.</span><br>
-          C_noprot(T) = T &middot; Σ loss_i^noprot<br>
-          C_prot(T)   = (1 + ⌊T / lifespan_j⌋) &middot; Σ install_i + T &middot; Σ (unprot_i + residual_i + maint_i/yr)<br><br>
-
-          <b>Net benefit at T</b><br>
-          Net(T) = C_noprot(T) &minus; C_prot(T)
-        </div>
-      </details>
     </div>
-  </main>
+  </section>
+
+  <!-- Page: Simple Model (currently a duplicate of the Complete Model) -->
+  <section class="page" id="page-simple">
+    <div id="model-sm" class="model-root">
+      <section class="panel">
+        <div class="panel-head-row">
+          <div>
+            <h2 class="panel-title">General context</h2>
+            <div class="panel-sub">Time horizon &middot; bear pressure &middot; protective measure &middot; encounter distribution</div>
+          </div>
+          <button class="reset-btn" id="sm-reset-all">Reset all to defaults</button>
+        </div>
+        <div class="general-grid" id="sm-general-grid"></div>
+      </section>
+
+      <section class="element-board" id="sm-element-board"></section>
+
+      <main class="results">
+        <div id="sm-element-cards"></div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">Overall cost-benefit over time</h2>
+            <span class="card-sub" id="sm-overall-card-sub">Per-year &middot; EUR</span>
+          </div>
+          <div class="chart-box tall">
+            <canvas id="sm-overallChart"></canvas>
+          </div>
+          <details>
+            <summary>Show formulas used</summary>
+            <div class="formula">
+              <b>1. Encounter rate λ (encounters per year)</b><br>
+              <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year per confident bear in the surrounding area; N_bears is the number of habituated/confident bears in the area; the food-availability modifier tunes the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
+              λ = I_y &middot; N_bears &middot; food<br><br>
+
+              <b>2. Element-level encounter rate</b><br>
+              <span class="formula-note">The total encounter rate is split across the three element types according to the encounter share s_enc_i, which represents the fraction of bear visits targeting each element type.</span><br>
+              λ_i = λ &middot; s_enc_i<br><br>
+
+              <b>3. Annual loss without protection</b><br>
+              <span class="formula-note">Each encounter targeting element i causes damage with probability P(D_i|B,E), and a damaging event takes u_i units. Expected units damaged per year is therefore P(D_i|B,E) · λ_i · u_i, capped by the available stock N_i — you can't lose more than you have.</span><br>
+              loss_i^noprot = min( P(D_i|B,E) &middot; λ_i &middot; u_i ,  N_i ) &middot; c_i<br><br>
+
+              <b>4. Annual cost with protection (covering a share s_prot_i of N_i units)</b><br>
+              <span class="formula-note">Protection splits the stock into N_unprot = (1 &minus; s_prot_i) &middot; N_i unprotected units and N_prot = s_prot_i &middot; N_i protected units. The bear's damaging "appetite" P(D_i|B,E) &middot; λ_i &middot; u_i is split between the two pools in proportion to their share of stock: fraction (1 &minus; s_prot_i) of attempts target unprotected units and always succeed; fraction s_prot_i target protected units and succeed only when the measure has failed (P(¬M_j)). Each pool is then capped by its own available stock. At s_prot_i = 0 the unprotected term reduces to the no-protection loss in step 3.</span><br><br>
+
+              <span class="formula-sub">Losses from unprotected units &mdash;</span> appetite share (1 &minus; s_prot_i) hits this pool, capped by N_unprot.<br>
+              unprot_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; (1 &minus; s_prot_i) ,  N_unprot ) &middot; c_i<br><br>
+
+              <span class="formula-sub">Losses from non-maintained infrastructure (measure fails) &mdash;</span> appetite share s_prot_i reaches the protected pool but only succeeds with probability P(¬M_j); capped by N_prot.<br>
+              residual_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; s_prot_i &middot; P(¬M_j) ,  N_prot ) &middot; c_i<br><br>
+
+              <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional. The per-unit maintenance rate is element-specific.<br>
+              maint_i/yr = c_maintenance_i &middot; N_i &middot; s_prot_i<br><br>
+
+              <span class="formula-sub">Installation (per cycle) &mdash;</span> paid upfront when the measure is deployed, and re-paid every lifespan_j years when the measure reaches end-of-life and is replaced.<br>
+              install_i = c_install_i &middot; N_i &middot; s_prot_i<br><br>
+
+              <b>5. Cumulative cost over T years</b><br>
+              <span class="formula-note">Without protection, cumulative cost grows linearly: T years of compensation. With protection, installation is paid in year 0 and re-paid every lifespan_j years (the chart shows step jumps at each re-investment). Each year between installations adds maintenance plus residual plus unprotected exposure. The crossover year — when the protected line drops below the unprotected one — is the payback period.</span><br>
+              C_noprot(T) = T &middot; Σ loss_i^noprot<br>
+              C_prot(T)   = (1 + ⌊T / lifespan_j⌋) &middot; Σ install_i + T &middot; Σ (unprot_i + residual_i + maint_i/yr)<br><br>
+
+              <b>Net benefit at T</b><br>
+              Net(T) = C_noprot(T) &minus; C_prot(T)
+            </div>
+          </details>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- Page: Complete Model -->
+  <section class="page" id="page-complete">
+    <div id="model-cm" class="model-root">
+      <section class="panel">
+        <div class="panel-head-row">
+          <div>
+            <h2 class="panel-title">General context</h2>
+            <div class="panel-sub">Time horizon &middot; bear pressure &middot; protective measure &middot; encounter distribution</div>
+          </div>
+          <button class="reset-btn" id="cm-reset-all">Reset all to defaults</button>
+        </div>
+        <div class="general-grid" id="cm-general-grid"></div>
+      </section>
+
+      <section class="element-board" id="cm-element-board"></section>
+
+      <main class="results">
+        <div id="cm-element-cards"></div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">Overall cost-benefit over time</h2>
+            <span class="card-sub" id="cm-overall-card-sub">Per-year &middot; EUR</span>
+          </div>
+          <div class="chart-box tall">
+            <canvas id="cm-overallChart"></canvas>
+          </div>
+          <details>
+            <summary>Show formulas used</summary>
+            <div class="formula">
+              <b>1. Encounter rate λ (encounters per year)</b><br>
+              <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year per confident bear in the surrounding area; N_bears is the number of habituated/confident bears in the area; the food-availability modifier tunes the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
+              λ = I_y &middot; N_bears &middot; food<br><br>
+
+              <b>2. Element-level encounter rate</b><br>
+              <span class="formula-note">The total encounter rate is split across the three element types according to the encounter share s_enc_i, which represents the fraction of bear visits targeting each element type.</span><br>
+              λ_i = λ &middot; s_enc_i<br><br>
+
+              <b>3. Annual loss without protection</b><br>
+              <span class="formula-note">Each encounter targeting element i causes damage with probability P(D_i|B,E), and a damaging event takes u_i units. Expected units damaged per year is therefore P(D_i|B,E) · λ_i · u_i, capped by the available stock N_i — you can't lose more than you have.</span><br>
+              loss_i^noprot = min( P(D_i|B,E) &middot; λ_i &middot; u_i ,  N_i ) &middot; c_i<br><br>
+
+              <b>4. Annual cost with protection (covering a share s_prot_i of N_i units)</b><br>
+              <span class="formula-note">Protection splits the stock into N_unprot = (1 &minus; s_prot_i) &middot; N_i unprotected units and N_prot = s_prot_i &middot; N_i protected units. The bear's damaging "appetite" P(D_i|B,E) &middot; λ_i &middot; u_i is split between the two pools in proportion to their share of stock: fraction (1 &minus; s_prot_i) of attempts target unprotected units and always succeed; fraction s_prot_i target protected units and succeed only when the measure has failed (P(¬M_j)). Each pool is then capped by its own available stock. At s_prot_i = 0 the unprotected term reduces to the no-protection loss in step 3.</span><br><br>
+
+              <span class="formula-sub">Losses from unprotected units &mdash;</span> appetite share (1 &minus; s_prot_i) hits this pool, capped by N_unprot.<br>
+              unprot_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; (1 &minus; s_prot_i) ,  N_unprot ) &middot; c_i<br><br>
+
+              <span class="formula-sub">Losses from non-maintained infrastructure (measure fails) &mdash;</span> appetite share s_prot_i reaches the protected pool but only succeeds with probability P(¬M_j); capped by N_prot.<br>
+              residual_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; s_prot_i &middot; P(¬M_j) ,  N_prot ) &middot; c_i<br><br>
+
+              <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional. The per-unit maintenance rate is element-specific.<br>
+              maint_i/yr = c_maintenance_i &middot; N_i &middot; s_prot_i<br><br>
+
+              <span class="formula-sub">Installation (per cycle) &mdash;</span> paid upfront when the measure is deployed, and re-paid every lifespan_j years when the measure reaches end-of-life and is replaced.<br>
+              install_i = c_install_i &middot; N_i &middot; s_prot_i<br><br>
+
+              <b>5. Cumulative cost over T years</b><br>
+              <span class="formula-note">Without protection, cumulative cost grows linearly: T years of compensation. With protection, installation is paid in year 0 and re-paid every lifespan_j years (the chart shows step jumps at each re-investment). Each year between installations adds maintenance plus residual plus unprotected exposure. The crossover year — when the protected line drops below the unprotected one — is the payback period.</span><br>
+              C_noprot(T) = T &middot; Σ loss_i^noprot<br>
+              C_prot(T)   = (1 + ⌊T / lifespan_j⌋) &middot; Σ install_i + T &middot; Σ (unprot_i + residual_i + maint_i/yr)<br><br>
+
+              <b>Net benefit at T</b><br>
+              Net(T) = C_noprot(T) &minus; C_prot(T)
+            </div>
+          </details>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- Page: Guide -->
+  <section class="page active" id="page-guide">
+    <div class="guide-grid">
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Model overview</h2>
+        </div>
+        <div class="card-body">
+          <p>This tool performs a cost-benefit analysis of two strategies for managing bear-caused damage on a single property over a fixed time horizon.</p>
+          <p><strong>No protection</strong> — the owner pays compensation every time a damage event occurs. Costs grow linearly with time and bear pressure.</p>
+          <p><strong>With protection</strong> — the owner installs a protective measure (electric fence, guardian dog, raised platform, etc.) covering a chosen share of each asset type. There is an upfront installation cost and a recurring annual maintenance cost, but losses from protected units are greatly reduced.</p>
+          <p>The model tracks three asset types — small livestock (sheep, goats, poultry), large livestock (cattle, horses), and agriculture (beehives, orchards) — each parameterised separately. The key output is the cumulative cost curve for both strategies, and the year at which protection becomes cheaper (the payback year).</p>
+          <p>Bear encounter pressure is driven by the number of habituated bears in the surrounding area and a baseline incursion rate. The Complete Model additionally exposes a food-availability modifier and per-element encounter distribution.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">How to use the tool</h2>
+        </div>
+        <div class="card-body">
+          <p>All sliders write to a single shared model state. A change made on the Simple Model page is immediately reflected on the Complete Model page and in the Data Source table, and vice versa.</p>
+          <p><strong>General context panel</strong> — set the time horizon, bear pressure, protective measure effectiveness and lifespan. These apply to all asset types.</p>
+          <p><strong>Per-element panels</strong> — tune parameters for each asset type individually: how many units you have, what share is protected, compensation costs, and installation and maintenance costs of the measure.</p>
+          <p><strong>Result cards</strong> — each asset type shows an annual cost breakdown and a cumulative cost chart. The overall chart aggregates all three types and displays the net benefit of protection at the chosen horizon.</p>
+          <p><strong>Reset button</strong> — restores all sliders to the default values from the Excel workbook.</p>
+          <p>The verdict in the page header updates in real time and summarises whether protection or compensation is the better strategy at the chosen time horizon.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Data source</h2>
+        </div>
+        <div class="card-body">
+          <p>All default parameter values are read from <strong>bear_attack_model_variables.xlsx</strong> at build time and embedded into this file. The Data Source page displays the full variable dictionary and allows you to edit any adjustable value directly — changes take effect immediately in both model pages without rebuilding.</p>
+          <p>The workbook contains 31 variables organised into groups: bear pressure, environment modifiers, per-element damage probabilities, encounter shares, maintenance probability, unit counts, units damaged per event, compensation costs, protection coverage, installation and maintenance costs, measure lifespan, and analysis time horizon.</p>
+          <p>Two variables are derived and cannot be edited directly: <strong>s_enc_Ag</strong> (agriculture encounter share) is automatically computed as 1 − s_enc_SL − s_enc_LL so that encounter shares always sum to 100%; <strong>P(¬M_j)</strong> (measure failure probability) is 1 − P(M_j).</p>
+          <p>To change the default values permanently, edit the Excel workbook and regenerate the HTML by running <code>python source/pipeline.py</code>.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Simple vs Complete model</h2>
+        </div>
+        <div class="card-body">
+          <p>The tool offers two views of the same underlying model.</p>
+          <p><strong>Simple Model</strong> — focuses on the parameters most likely to vary between properties: bear count, time horizon, protective measure quality, number of units, share protected, and costs. Advanced parameters (food availability modifier, encounter distribution, units damaged per event) are hidden so the interface stays uncluttered. Suitable for a quick first assessment or for users unfamiliar with the full model.</p>
+          <p><strong>Complete Model</strong> — exposes every parameter in the model. Use this for sensitivity analysis, to understand how food availability or encounter distribution affects the result, or to calibrate the model carefully against observed data.</p>
+          <p>Both views share the same state — sliders changed in one view are visible in the other. The underlying formulas and calculations are identical; only the set of visible controls differs.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
 
   <div class="footer">
     Generated from bear_attack_model_variables.xlsx &middot; Adjust sliders to model your scenario &middot; All values in EUR
@@ -767,63 +1145,63 @@
 </div>
 
 <script>
-const VARIABLES = [{"name": "Bear presence", "description": "Probability that a bear is present in the area or property within the defined time window (e.g., one year).", "notation": "P(B)", "value": 0.6}, {"name": "Encounter given bear presence", "description": "Probability of an encounter between a bear and a vulnerable element (livestock or agricultural asset), given that a bear is present in the area. Now interpreted as a damage-causing encounter.", "notation": "P(E|B)", "value": 0.85}, {"name": "Average bear incursions per year", "description": "Estimated number of bear incursions per year in the broader area surrounding the property - a baseline pressure metric used to scale the attack rate.", "notation": "I_y", "value": 2200}, {"name": "Food availability modifier", "description": "Multiplicative adjustment on the attack rate based on wild food availability. Low mast/berry years (>1) increase the attack rate; abundant wild food (<1) decreases it.", "notation": "P(D_i|food)", "value": 1}, {"name": "Bear density modifier", "description": "Multiplicative adjustment on the property-level attack rate based on local bear population density.", "notation": "P(D_i|density)", "value": 1}, {"name": "Damage to small livestock", "description": "Probability of damage to small livestock (sheep, goats, poultry) given bear presence and encounter. Combined with the attack share to determine how many events target this element type.", "notation": "P(D_SL|B,E)", "value": 0.85}, {"name": "Damage to large livestock", "description": "Probability of damage to large livestock (cattle, horses) given bear presence and encounter.", "notation": "P(D_LL|B,E)", "value": 0.35}, {"name": "Damage to agriculture", "description": "Probability of damage to agricultural assets (orchards, beehives, crops) given bear presence and encounter.", "notation": "P(D_Ag|B,E)", "value": 0.65}, {"name": "Attack share - small livestock", "description": "Share of all bear attacks at this property that target small livestock. The three element shares must sum to 100%.", "notation": "s_SL", "value": 0.66}, {"name": "Attack share - large livestock", "description": "Share of all bear attacks at this property that target large livestock. The three element shares must sum to 100%.", "notation": "s_LL", "value": 0.1}, {"name": "Attack share - agriculture", "description": "Share of all bear attacks at this property that target agricultural assets. The three element shares must sum to 100%.", "notation": "s_Ag", "value": 0.24}, {"name": "Maintenance of protective measure", "description": "Probability that the protective measure is properly maintained (functional) at the time of an encounter. A maintained measure is assumed to be 100% effective.", "notation": "P(M_j)", "value": 0.85}, {"name": "Failure of protective measure", "description": "Probability that the protective measure fails (1 - P(M_j)). Auto-derived from P(M_j).", "notation": "P(¬M_j)", "value": 0.15}, {"name": "Number of small livestock units", "description": "Total number of small livestock units (head) present and exposed on the property.", "notation": "N_SL", "value": 15000}, {"name": "Number of large livestock units", "description": "Total number of large livestock units (head) present and exposed on the property.", "notation": "N_LL", "value": 2500}, {"name": "Number of agricultural units", "description": "Total number of agricultural units exposed on the property (e.g., beehives, fruit trees).", "notation": "N_Ag", "value": 2000}, {"name": "Units damaged per event - small livestock", "description": "Expected number of small livestock units lost or damaged in a single bear damage event when the bear has access. A behavioral parameter of bear-on-flock attacks; bears typically take 3-5 head per event.", "notation": "u_SL", "value": 10}, {"name": "Units damaged per event - large livestock", "description": "Expected number of large livestock units (typically calves) lost in a single bear damage event when the bear has access. Bears usually take 1 calf per event.", "notation": "u_LL", "value": 2}, {"name": "Units damaged per event - agriculture", "description": "Expected number of agricultural units (e.g., beehives) destroyed in a single bear damage event when the bear has access. Bears tend to destroy multiple beehives per visit.", "notation": "u_Ag", "value": 6}, {"name": "Compensation cost per unit - small livestock", "description": "Compensation paid per small livestock unit lost or damaged.", "notation": "c_SL", "value": 50}, {"name": "Compensation cost per unit - large livestock", "description": "Compensation paid per large livestock unit lost or damaged.", "notation": "c_LL", "value": 800}, {"name": "Compensation cost per unit - agriculture", "description": "Compensation paid per agricultural unit lost or damaged.", "notation": "c_Ag", "value": 600}, {"name": "Share of small livestock protected", "description": "Fraction of small livestock units (0-1) covered by the protective measure (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_SL", "value": 0.6}, {"name": "Share of large livestock protected", "description": "Fraction of large livestock units (0-1) covered by the protective measure.", "notation": "s_prot_LL", "value": 0.25}, {"name": "Share of agriculture protected", "description": "Fraction of agricultural units (0-1) covered by the protective measure (e.g., beehives behind a bear-proof fence).", "notation": "s_prot_Ag", "value": 0.2}, {"name": "Installation cost per unit - small livestock", "description": "One-time installation cost of the protective measure for small livestock, per unit protected (e.g., per sheep place in a guarded enclosure).", "notation": "c_install_SL", "value": 20}, {"name": "Installation cost per unit - large livestock", "description": "One-time installation cost of the protective measure for large livestock, per unit protected.", "notation": "c_install_LL", "value": 80}, {"name": "Installation cost per unit - agriculture", "description": "One-time installation cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).", "notation": "c_install_Ag", "value": 80}, {"name": "Maintenance cost per unit protected", "description": "Recurring annual maintenance cost of the protective measure, per unit protected (averaged across element types).", "notation": "c_maintenance_j", "value": 5}, {"name": "Lifespan of protective measure", "description": "Expected useful lifespan of the protective measure, in years. After this period a re-investment would be needed.", "notation": "lifespan_j", "value": 10}, {"name": "Analysis time horizon", "description": "Number of years over which the cumulative cost-benefit is evaluated. Installation costs are paid in year 0; maintenance and damages accrue each year.", "notation": "T", "value": 12}];
+const VARIABLES = [{"name": "Average bear incursions per year", "description": "Estimated number of bear incursions per year in the broader area surrounding the property - a baseline pressure metric used to scale the attack rate.", "notation": "I_y", "value": 350}, {"name": "Number of confident bears", "description": "Number of bears in the broader area that are habituated/confident enough to approach human settlements and cause damage. Multiplied by I_y to scale the property-level encounter rate.", "notation": "N_bears", "value": 5}, {"name": "Food availability modifier", "description": "Multiplicative adjustment on the attack rate based on wild food availability. Low mast/berry years (>1) increase the attack rate; abundant wild food (<1) decreases it.", "notation": "P(D_i|food)", "value": 1}, {"name": "Damage to small livestock", "description": "Probability of damage to small livestock (sheep, goats, poultry) given bear presence and encounter. Combined with the encounter share to determine how many events target this element type.", "notation": "P(D_SL|B,E)", "value": 0.85}, {"name": "Damage to large livestock", "description": "Probability of damage to large livestock (cattle, horses) given bear presence and encounter.", "notation": "P(D_LL|B,E)", "value": 0.35}, {"name": "Damage to agriculture", "description": "Probability of damage to agricultural assets (orchards, beehives, crops) given bear presence and encounter.", "notation": "P(D_Ag|B,E)", "value": 0.65}, {"name": "Encounter share - small livestock", "description": "Share of all bear encounters at this property that target small livestock. The three element shares must sum to 100%.", "notation": "s_enc_SL", "value": 0.66}, {"name": "Encounter share - large livestock", "description": "Share of all bear encounters at this property that target large livestock. The three element shares must sum to 100%.", "notation": "s_enc_LL", "value": 0.1}, {"name": "Encounter share - agriculture", "description": "Share of all bear encounters at this property that target agricultural assets. The three element shares must sum to 100%.", "notation": "s_enc_Ag", "value": 0.24}, {"name": "Maintenance of protective measure", "description": "Probability that the protective measure is properly maintained (functional) at the time of an encounter. A maintained measure is assumed to be 100% effective.", "notation": "P(M_j)", "value": 0.85}, {"name": "Failure of protective measure", "description": "Probability that the protective measure fails (1 - P(M_j)). Auto-derived from P(M_j).", "notation": "P(¬M_j)", "value": 0.15}, {"name": "Number of small livestock units", "description": "Total number of small livestock units (head) present and exposed on the property.", "notation": "N_SL", "value": 15000}, {"name": "Number of large livestock units", "description": "Total number of large livestock units (head) present and exposed on the property.", "notation": "N_LL", "value": 2500}, {"name": "Number of agricultural units", "description": "Total number of agricultural units exposed on the property (e.g., beehives, fruit trees).", "notation": "N_Ag", "value": 2000}, {"name": "Units damaged per event - small livestock", "description": "Expected number of small livestock units lost or damaged in a single bear damage event when the bear has access. A behavioral parameter of bear-on-flock attacks; bears typically take 3-5 head per event.", "notation": "u_SL", "value": 10}, {"name": "Units damaged per event - large livestock", "description": "Expected number of large livestock units (typically calves) lost in a single bear damage event when the bear has access. Bears usually take 1 calf per event.", "notation": "u_LL", "value": 2}, {"name": "Units damaged per event - agriculture", "description": "Expected number of agricultural units (e.g., beehives) destroyed in a single bear damage event when the bear has access. Bears tend to destroy multiple beehives per visit.", "notation": "u_Ag", "value": 6}, {"name": "Compensation cost per unit - small livestock", "description": "Compensation paid per small livestock unit lost or damaged.", "notation": "c_SL", "value": 50}, {"name": "Compensation cost per unit - large livestock", "description": "Compensation paid per large livestock unit lost or damaged.", "notation": "c_LL", "value": 800}, {"name": "Compensation cost per unit - agriculture", "description": "Compensation paid per agricultural unit lost or damaged.", "notation": "c_Ag", "value": 600}, {"name": "Share of small livestock protected", "description": "Percentage of protected small livestock units (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_SL", "value": 0.6}, {"name": "Share of large livestock protected", "description": "Percentage of protected large livestock units (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_LL", "value": 0.25}, {"name": "Share of agriculture protected", "description": "Percentage of protected agricultrue units (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_Ag", "value": 0.2}, {"name": "Installation cost per unit - small livestock", "description": "One-time installation cost of the protective measure for small livestock, per unit protected (e.g., per sheep place in a guarded enclosure).", "notation": "c_install_SL", "value": 20}, {"name": "Installation cost per unit - large livestock", "description": "One-time installation cost of the protective measure for large livestock, per unit protected.", "notation": "c_install_LL", "value": 80}, {"name": "Installation cost per unit - agriculture", "description": "One-time installation cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).", "notation": "c_install_Ag", "value": 80}, {"name": "Maintenance cost per unit protected - small livestock", "description": "Recurring annual maintenance cost of the protective measure for small livestock, per unit protected (e.g., per sheep place).", "notation": "c_maintenance_SL", "value": 5}, {"name": "Maintenance cost per unit protected - large livestock", "description": "Recurring annual maintenance cost of the protective measure for large livestock, per unit protected.", "notation": "c_maintenance_LL", "value": 20}, {"name": "Maintenance cost per unit protected - agriculture", "description": "Recurring annual maintenance cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).", "notation": "c_maintenance_Ag", "value": 5}, {"name": "Lifespan of protective measure", "description": "Expected useful lifespan of the protective measure, in years. After this period a re-investment would be needed.", "notation": "lifespan_j", "value": 10}, {"name": "Analysis time horizon", "description": "Number of years over which the cumulative cost-benefit is evaluated. Installation costs are paid in year 0; maintenance and damages accrue each year.", "notation": "T", "value": 12}];
 const DEFAULTS = JSON.parse(JSON.stringify(VARIABLES));
 
 // === Slider configuration ===
 const SLIDER_CONFIG = {
   // --- General: Bear pressure ---
-  "I_y":           {min:0, max:10000,step:50,   fmt:'int',  section:'general:bear'},
-  "P(B)":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:bear'},
-  "P(E|B)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:bear'},
+  "I_y":           {min:0, max:500,  step:10,   fmt:'int',  section:'general:bear'},
+  "N_bears":       {min:0, max:50,   step:1,    fmt:'int',  section:'general:bear'},
 
   // --- General: Environment modifiers ---
-  "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
-  "P(D_i|density)":{min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
+  "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear', hideInScopes:['sm']},
 
   // --- General: Protective measure ---
   "P(M_j)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:measure'},
-  "c_maintenance_j":{min:0, max:100, step:1,    fmt:'eur',  section:'general:measure'},
   "lifespan_j":    {min:1, max:30,   step:1,    fmt:'yr',   section:'general:measure'},
 
   // --- General: Time horizon ---
   "T":             {min:1, max:50,   step:1,    fmt:'yr',   section:'general:time'},
 
   // --- General: Distribution of encounters by element type ---
-  "s_SL":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
-  "s_LL":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
-  "s_Ag":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
+  "s_enc_SL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
+  "s_enc_LL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
+  "s_enc_Ag":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
 
   // --- Per-element: Small Livestock ---
   "P(D_SL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
   "N_SL":          {min:0, max:35000,step:10,   fmt:'int',  section:'SL'},
-  "u_SL":          {min:0, max:30,   step:1,    fmt:'int',  section:'SL'},
-  "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
+  "u_SL":          {min:0, max:30,   step:1,    fmt:'int',  section:'SL', hideInScopes:['sm']},
   "s_prot_SL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
+  "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
   "c_install_SL":  {min:0, max:500,  step:5,    fmt:'eur',  section:'SL'},
+  "c_maintenance_SL":{min:0, max:100, step:1,   fmt:'eur',  section:'SL'},
 
   // --- Per-element: Large Livestock ---
   "P(D_LL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
   "N_LL":          {min:0, max:10000,step:10,    fmt:'int',  section:'LL'},
-  "u_LL":          {min:0, max:10,   step:1,    fmt:'int',  section:'LL'},
-  "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
+  "u_LL":          {min:0, max:10,   step:1,    fmt:'int',  section:'LL', hideInScopes:['sm']},
   "s_prot_LL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
+  "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
   "c_install_LL":  {min:0, max:1000, step:10,   fmt:'eur',  section:'LL'},
+  "c_maintenance_LL":{min:0, max:200, step:1,   fmt:'eur',  section:'LL'},
 
   // --- Per-element: Agriculture ---
   "P(D_Ag|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
   "N_Ag":          {min:0, max:20000,step:10,   fmt:'int',  section:'Ag'},
-  "u_Ag":          {min:0, max:30,   step:1,    fmt:'int',  section:'Ag'},
-  "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
+  "u_Ag":          {min:0, max:30,   step:1,    fmt:'int',  section:'Ag', hideInScopes:['sm']},
   "s_prot_Ag":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
+  "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
   "c_install_Ag":  {min:0, max:500,  step:5,    fmt:'eur',  section:'Ag'},
+  "c_maintenance_Ag":{min:0, max:100, step:1,   fmt:'eur',  section:'Ag'},
 };
 
 const GENERAL_SUBSECTIONS = [
   { id: 'time',        label: 'Time horizon' },
   { id: 'bear',        label: 'Bear pressure' },
   { id: 'measure',     label: 'Protective measure' },
-  { id: 'attack-share', label: 'Distribution of encounters by element type' }
+  { id: 'encounter-share', label: 'Distribution of encounters by element type' }
 ];
 
 const ELEMENT_PANELS = [
@@ -837,9 +1215,6 @@ const ELEMENT_COLOR_VARS = {
   LL: '--element-large',
   Ag: '--element-agriculture'
 };
-function elementColor(key) {
-  return cssVar(ELEMENT_COLOR_VARS[key]);
-}
 
 const fmt = {
   pct: v => (v*100).toFixed(0) + '%',
@@ -850,234 +1225,16 @@ const fmt = {
 };
 const fmtMoney = v => '€' + Math.round(v).toLocaleString();
 
-const THEME_KEY = 'bear-theme';
-const themeToggle = document.getElementById('theme-toggle');
-
 function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
-
-// === State ===
-let state = {};
-VARIABLES.forEach(v => { state[v.notation] = Number(v.value); });
-state['P(¬M_j)'] = 1 - state['P(M_j)'];
-
 function getVar(notation) {
   return VARIABLES.find(v => v.notation === notation);
 }
 function cssId(n) { return n.replace(/[^a-zA-Z0-9]/g, '_'); }
+function elementColor(key) { return cssVar(ELEMENT_COLOR_VARS[key]); }
 
-function renderControl(notation) {
-  const cfg = SLIDER_CONFIG[notation];
-  const v = getVar(notation);
-  if (!v) return '';
-  const isAutoShare = notation === 's_Ag';
-  const disabledAttr = isAutoShare ? ' disabled aria-describedby="auto-share-s_Ag"' : '';
-  const autoNote = isAutoShare
-    ? '<span class="control-note" id="auto-share-s_Ag">Calculated from the other attack shares</span>'
-    : '';
-  return `
-    <div class="control${isAutoShare ? ' control-auto' : ''}" title="${(v.description || '').replace(/"/g, '&quot;')}">
-      <div class="control-head">
-        <span class="control-label">${v.name}<span class="control-notation">${notation}</span></span>
-        <span class="control-value" id="val-${cssId(notation)}">${fmt[cfg.fmt](state[notation])}</span>
-      </div>
-      <input type="range" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}" value="${state[notation]}" data-key="${notation}"${disabledAttr} />
-      ${autoNote}
-    </div>
-  `;
-}
-
-// Build General Context
-const generalGrid = document.getElementById('general-grid');
-const lambdaBox = document.createElement('div');
-lambdaBox.className = 'lambda-display';
-lambdaBox.innerHTML = `
-  <div class="lambda-label">
-    Expected encounters per year
-    <span class="lambda-formula">lambda = I_y * P(B) * P(E|B) * food * density</span>
-  </div>
-  <div class="lambda-value" id="lambda-value">-</div>
-`;
-GENERAL_SUBSECTIONS.forEach(sub => {
-  const sectionId = 'general:' + sub.id;
-  const items = Object.keys(SLIDER_CONFIG).filter(n => SLIDER_CONFIG[n].section === sectionId);
-  if (!items.length) return;
-  const header = document.createElement('div');
-  header.className = 'general-subsection';
-  header.textContent = sub.label;
-  generalGrid.appendChild(header);
-  const row = document.createElement('div');
-  row.className = 'general-row general-row-' + sub.id;
-  items.forEach(notation => {
-    const wrap = document.createElement('div');
-    wrap.innerHTML = renderControl(notation);
-    row.appendChild(wrap.firstElementChild);
-  });
-  generalGrid.appendChild(row);
-  if (sub.id === 'measure') {
-    generalGrid.appendChild(lambdaBox);
-  }
-});
-
-// Build per-element panels
-const elementBoard = document.getElementById('element-board');
-ELEMENT_PANELS.forEach(ep => {
-  const items = Object.keys(SLIDER_CONFIG).filter(n => SLIDER_CONFIG[n].section === ep.key);
-  const panel = document.createElement('div');
-  panel.className = 'element-panel ' + ep.cls;
-  panel.innerHTML = `
-    <div class="element-panel-head">
-      <h3 class="element-panel-title">${ep.name}</h3>
-      <span class="element-panel-tag">${ep.tag}</span>
-    </div>
-    <div class="element-events" id="events-${ep.key}">
-      <span>Expected events / year</span><strong>—</strong>
-    </div>
-    ${items.map(renderControl).join('')}
-  `;
-  elementBoard.appendChild(panel);
-});
-
-// Build per-element result cards (table left, chart right)
-const elementCards = document.getElementById('element-cards');
-ELEMENT_PANELS.forEach(ep => {
-  const card = document.createElement('div');
-  card.className = 'card element-card ' + ep.cls;
-  card.innerHTML = `
-    <div class="card-head">
-      <h2 class="card-title"><em>${ep.name}</em></h2>
-      <span class="card-sub" id="el-card-sub-${ep.key}">Per-year · EUR</span>
-    </div>
-    <div class="element-results-grid">
-      <div>
-        <table class="metric-table">
-          <tbody id="el-metrics-${ep.key}"></tbody>
-        </table>
-      </div>
-      <div class="chart-box">
-        <canvas id="elementChart-${ep.key}"></canvas>
-      </div>
-    </div>
-  `;
-  elementCards.appendChild(card);
-});
-
-// === Attack share sliders ===
-const USER_SHARE_KEYS = ['s_SL', 's_LL'];
-const AUTO_SHARE_KEY = 's_Ag';
-
-function setSliderValue(key) {
-  const inp = document.querySelector(`input[data-key="${key}"]`);
-  if (inp) inp.value = state[key];
-  const valEl = document.getElementById('val-' + cssId(key));
-  if (valEl) valEl.textContent = fmt[SLIDER_CONFIG[key].fmt](state[key]);
-}
-
-function updateAttackShares(changedKey) {
-  if (!USER_SHARE_KEYS.includes(changedKey)) return;
-  const otherKey = USER_SHARE_KEYS.find(k => k !== changedKey);
-  const maxForChanged = Math.max(0, 1 - state[otherKey]);
-
-  state[changedKey] = Math.min(Math.max(0, state[changedKey]), maxForChanged);
-  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_SL'] - state['s_LL']);
-
-  setSliderValue(changedKey);
-  setSliderValue(AUTO_SHARE_KEY);
-}
-
-function resetAttackSharesFromDefaults() {
-  const userSum = USER_SHARE_KEYS.reduce((sum, key) => sum + state[key], 0);
-  if (userSum > 1) {
-    USER_SHARE_KEYS.forEach(key => { state[key] = state[key] / userSum; });
-  }
-  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_SL'] - state['s_LL']);
-}
-
-resetAttackSharesFromDefaults();
-[...USER_SHARE_KEYS, AUTO_SHARE_KEY].forEach(setSliderValue);
-
-// === Wire up sliders ===
-document.querySelectorAll('input[type=range]').forEach(inp => {
-  inp.addEventListener('input', e => {
-    const key = e.target.dataset.key;
-    state[key] = Number(e.target.value);
-    if (key === 'P(M_j)') state['P(¬M_j)'] = 1 - state[key];
-    if (USER_SHARE_KEYS.includes(key)) updateAttackShares(key);
-    setSliderValue(key);
-    recompute();
-  });
-});
-
-document.getElementById('reset-all').addEventListener('click', () => {
-  DEFAULTS.forEach(v => { state[v.notation] = Number(v.value); });
-  state['P(¬M_j)'] = 1 - state['P(M_j)'];
-  resetAttackSharesFromDefaults();
-  document.querySelectorAll('input[type=range]').forEach(inp => {
-    const k = inp.dataset.key;
-    setSliderValue(k);
-  });
-  recompute();
-});
-
-// === Model ===
-// Element-level damage probability P(D_i|B,E) is applied downstream per element.
-function computeLambda() {
-  const s = state;
-  return s['I_y'] * s['P(B)'] * s['P(E|B)'] * s['P(D_i|food)'] * s['P(D_i|density)'];
-}
-
-function modelFor(elementKey, lambda) {
-  const s = state;
-  const lambda_i = lambda * s['s_' + elementKey];
-  const N = s['N_' + elementKey];
-  const u = s['u_' + elementKey];
-  const c = s['c_' + elementKey];
-  const pD = s['P(D_' + elementKey + '|B,E)'];
-  const protShare = Math.max(0, Math.min(1, s['s_prot_' + elementKey]));
-  const cInst = s['c_install_' + elementKey];
-  const expectedUnits = pD * lambda_i * u;
-
-  // Compute one scenario (a given protection share). The bear's damaging
-  // "appetite" expectedUnits is split between the two pools in proportion to
-  // their share of stock: a fraction (1 - share) of attempts target the
-  // unprotected pool and always succeed; a fraction `share` target the
-  // protected pool and succeed only when the measure has failed (P(¬M_j)).
-  // Each pool is then capped by its own available stock.
-  // The no-protection baseline is just this same calculation at share = 0.
-  function scenarioAt(share) {
-    const Nprot   = Math.min(Math.round(share * N), N);
-    const Nunprot = Math.max(0, N - Nprot);
-    const unprotUnits   = Math.min(expectedUnits * (1 - share),                Nunprot);
-    const residualUnits = Math.min(expectedUnits * share * s['P(¬M_j)'],       Nprot);
-    const unprotPerYr   = unprotUnits   * c;
-    const residualPerYr = residualUnits * c;
-    const maintPerYr    = s['c_maintenance_j'] * Nprot;
-    const installYr0    = cInst * Nprot;
-    return {
-      Nprot, Nunprot,
-      unprotPerYr, residualPerYr, maintPerYr, installYr0,
-      annualPerYr: unprotPerYr + residualPerYr + maintPerYr,
-    };
-  }
-
-  const noProt = scenarioAt(0);
-  const prot   = scenarioAt(protShare);
-
-  return {
-    lambda_i,
-    noProtPerYr:   noProt.annualPerYr,
-    unprotPerYr:   prot.unprotPerYr,
-    residualPerYr: prot.residualPerYr,
-    maintPerYr:    prot.maintPerYr,
-    installYr0:    prot.installYr0,
-    protPerYr:     prot.annualPerYr,
-    Nprot:         prot.Nprot,
-    Nunprot:       prot.Nunprot,
-  };
-}
-
-// === Charts ===
+// === Chart globals ===
 Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.color = cssVar('--ink-dim');
 Chart.defaults.borderColor = cssVar('--line');
@@ -1133,9 +1290,402 @@ function legendLineSample(color, dash = [], lineWidth = 2) {
   return canvas;
 }
 
-const elementCharts = {};
-ELEMENT_PANELS.forEach(ep => {
-  elementCharts[ep.key] = new Chart(document.getElementById('elementChart-' + ep.key), {
+// === Shared state ===
+// One source of truth for all model instances. Sliders on any page write here;
+// every page (and the variables table) reads from here.
+const state = {};
+VARIABLES.forEach(v => { state[v.notation] = Number(v.value); });
+state['P(¬M_j)'] = 1 - state['P(M_j)'];
+
+const SCOPES = ['cm', 'sm'];
+const USER_SHARE_KEYS = ['s_enc_SL', 's_enc_LL'];
+const AUTO_SHARE_KEY = 's_enc_Ag';
+const modelInstances = [];
+
+function setSliderValueAll(key) {
+  if (!SLIDER_CONFIG[key]) return;
+  document.querySelectorAll(`input[data-key="${key}"]`).forEach(inp => {
+    inp.value = state[key];
+  });
+  SCOPES.forEach(scope => {
+    const valEl = document.getElementById(`${scope}-val-${cssId(key)}`);
+    if (valEl) valEl.textContent = fmt[SLIDER_CONFIG[key].fmt](state[key]);
+  });
+}
+
+function updateEncounterShares(changedKey) {
+  if (!USER_SHARE_KEYS.includes(changedKey)) return;
+  const otherKey = USER_SHARE_KEYS.find(k => k !== changedKey);
+  const maxForChanged = Math.max(0, 1 - state[otherKey]);
+  state[changedKey] = Math.min(Math.max(0, state[changedKey]), maxForChanged);
+  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_enc_SL'] - state['s_enc_LL']);
+  setSliderValueAll(changedKey);
+  setSliderValueAll(AUTO_SHARE_KEY);
+}
+
+function resetEncounterSharesFromDefaults() {
+  const userSum = USER_SHARE_KEYS.reduce((sum, key) => sum + state[key], 0);
+  if (userSum > 1) {
+    USER_SHARE_KEYS.forEach(key => { state[key] = state[key] / userSum; });
+  }
+  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_enc_SL'] - state['s_enc_LL']);
+}
+
+resetEncounterSharesFromDefaults();
+
+function recomputeAll() {
+  modelInstances.forEach(i => i.recompute());
+  updateVariablesTableValues();
+}
+
+function resetAll() {
+  DEFAULTS.forEach(v => { state[v.notation] = Number(v.value); });
+  state['P(¬M_j)'] = 1 - state['P(M_j)'];
+  resetEncounterSharesFromDefaults();
+  Object.keys(SLIDER_CONFIG).forEach(setSliderValueAll);
+  recomputeAll();
+}
+
+// === Tabs ===
+function setupTabs() {
+  const tabButtons = document.querySelectorAll('.tabs button[data-page]');
+  const allPageButtons = document.querySelectorAll('[data-page]');
+  allPageButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const page = btn.dataset.page;
+      document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
+      tabButtons.forEach(b => b.classList.toggle('active', b.dataset.page === page));
+      allPageButtons.forEach(b => {
+        if (!b.closest('.tabs')) b.classList.toggle('active', b.dataset.page === page);
+      });
+    });
+  });
+}
+
+// === Variables table ===
+// Built once at init. Editable (number input) for variables that have a slider
+// config; read-only span for derived/auto values. While the user is typing,
+// recomputeAll() updates other cells but leaves the focused input alone.
+const variablesTableRows = [];
+
+function formatReadOnlyValue(notation, current, fallback) {
+  if (current === undefined || current === null || Number.isNaN(current)) {
+    return String(fallback ?? '');
+  }
+  if (notation === 'P(¬M_j)') {
+    return Number(Number(current).toFixed(3)).toString();
+  }
+  const cfg = SLIDER_CONFIG[notation];
+  if (cfg && fmt[cfg.fmt]) return fmt[cfg.fmt](current);
+  return String(current);
+}
+
+function buildVariablesTable() {
+  const tbody = document.querySelector('#variables-table tbody');
+  if (!tbody) return;
+  variablesTableRows.length = 0;
+  tbody.textContent = '';
+
+  VARIABLES.forEach(v => {
+    const tr = document.createElement('tr');
+    const cfg = SLIDER_CONFIG[v.notation];
+    const editable = !!cfg && v.notation !== AUTO_SHARE_KEY;
+    if (!editable) tr.classList.add('readonly');
+
+    const tdName = document.createElement('td');
+    tdName.textContent = v.name || '';
+
+    const tdNotation = document.createElement('td');
+    tdNotation.className = 'mono';
+    tdNotation.textContent = v.notation || '';
+
+    const tdValue = document.createElement('td');
+    tdValue.className = 'mono value-cell';
+
+    let valueEl;
+    if (editable) {
+      valueEl = document.createElement('input');
+      valueEl.type = 'number';
+      valueEl.className = 'var-input';
+      valueEl.dataset.key = v.notation;
+      valueEl.min = cfg.min;
+      valueEl.max = cfg.max;
+      valueEl.step = cfg.step;
+      valueEl.value = state[v.notation];
+
+      valueEl.addEventListener('input', () => {
+        const raw = Number(valueEl.value);
+        if (Number.isNaN(raw)) return;
+        const clamped = Math.max(cfg.min, Math.min(cfg.max, raw));
+        state[v.notation] = clamped;
+        if (v.notation === 'P(M_j)') state['P(¬M_j)'] = 1 - state[v.notation];
+        if (USER_SHARE_KEYS.includes(v.notation)) updateEncounterShares(v.notation);
+        setSliderValueAll(v.notation);
+        recomputeAll();
+      });
+
+      valueEl.addEventListener('blur', () => {
+        // On blur, normalise the displayed value to the clamped state value.
+        valueEl.value = state[v.notation];
+      });
+    } else {
+      valueEl = document.createElement('span');
+      valueEl.className = 'mono-text';
+      valueEl.textContent = formatReadOnlyValue(v.notation, state[v.notation], v.value);
+    }
+    tdValue.appendChild(valueEl);
+
+    const tdDesc = document.createElement('td');
+    tdDesc.className = 'desc';
+    tdDesc.textContent = v.description || '';
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdNotation);
+    tr.appendChild(tdValue);
+    tr.appendChild(tdDesc);
+    tbody.appendChild(tr);
+
+    variablesTableRows.push({ notation: v.notation, valueEl, editable, fallback: v.value });
+  });
+}
+
+function updateVariablesTableValues() {
+  variablesTableRows.forEach(({ notation, valueEl, editable, fallback }) => {
+    const cur = state[notation];
+    if (editable) {
+      if (document.activeElement !== valueEl) {
+        valueEl.value = cur;
+      }
+    } else {
+      valueEl.textContent = formatReadOnlyValue(notation, cur, fallback);
+    }
+  });
+}
+
+// === Model instance (DOM + charts only — state is shared) ===
+function mountModel(scope) {
+  const root = document.getElementById('model-' + scope);
+  if (!root) return;
+  const $ = id => document.getElementById(scope + '-' + id);
+
+  function renderControl(notation) {
+    const cfg = SLIDER_CONFIG[notation];
+    const v = getVar(notation);
+    if (!v) return '';
+    const isAutoShare = notation === 's_enc_Ag';
+    const autoShareId = `${scope}-auto-share-s_enc_Ag`;
+    const disabledAttr = isAutoShare ? ` disabled aria-describedby="${autoShareId}"` : '';
+    const autoNote = isAutoShare
+      ? `<span class="control-note" id="${autoShareId}">Calculated from the other encounter shares</span>`
+      : '';
+    return `
+      <div class="control${isAutoShare ? ' control-auto' : ''}" title="${(v.description || '').replace(/"/g, '&quot;')}">
+        <div class="control-head">
+          <span class="control-label">${v.name}<span class="control-notation">${notation}</span></span>
+          <span class="control-value" id="${scope}-val-${cssId(notation)}">${fmt[cfg.fmt](state[notation])}</span>
+        </div>
+        <input type="range" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}" value="${state[notation]}" data-key="${notation}"${disabledAttr} />
+        ${autoNote}
+      </div>
+    `;
+  }
+
+  // Build General Context
+  const generalGrid = $('general-grid');
+  const lambdaBox = document.createElement('div');
+  lambdaBox.className = 'lambda-display';
+  lambdaBox.innerHTML = `
+    <div class="lambda-label">
+      Expected encounters per year
+      <span class="lambda-formula">${scope === 'sm' ? 'lambda = I_y * N_bears' : 'lambda = I_y * N_bears * food'}</span>
+    </div>
+    <div class="lambda-value" id="${scope}-lambda-value">-</div>
+  `;
+  GENERAL_SUBSECTIONS.forEach(sub => {
+    const sectionId = 'general:' + sub.id;
+    const items = Object.keys(SLIDER_CONFIG).filter(n => {
+      const cfg = SLIDER_CONFIG[n];
+      return cfg.section === sectionId && !(cfg.hideInScopes && cfg.hideInScopes.includes(scope));
+    });
+    if (!items.length) return;
+    const header = document.createElement('div');
+    header.className = 'general-subsection';
+    header.textContent = sub.label;
+    generalGrid.appendChild(header);
+    const row = document.createElement('div');
+    row.className = 'general-row general-row-' + sub.id;
+    items.forEach(notation => {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = renderControl(notation);
+      row.appendChild(wrap.firstElementChild);
+    });
+    generalGrid.appendChild(row);
+    if (sub.id === 'measure') {
+      generalGrid.appendChild(lambdaBox);
+    }
+  });
+
+  // Per-element panels
+  const elementBoard = $('element-board');
+  ELEMENT_PANELS.forEach(ep => {
+    const items = Object.keys(SLIDER_CONFIG).filter(n => {
+      const cfg = SLIDER_CONFIG[n];
+      return cfg.section === ep.key && !(cfg.hideInScopes && cfg.hideInScopes.includes(scope));
+    });
+    const panel = document.createElement('div');
+    panel.className = 'element-panel ' + ep.cls;
+    panel.innerHTML = `
+      <div class="element-panel-head">
+        <h3 class="element-panel-title">${ep.name}</h3>
+        <span class="element-panel-tag">${ep.tag}</span>
+      </div>
+      <div class="element-events" id="${scope}-events-${ep.key}">
+        <span>Expected encounters / year</span><strong>—</strong>
+      </div>
+      ${items.map(renderControl).join('')}
+    `;
+    elementBoard.appendChild(panel);
+  });
+
+  // Per-element result cards (table left, chart right)
+  const elementCards = $('element-cards');
+  ELEMENT_PANELS.forEach(ep => {
+    const card = document.createElement('div');
+    card.className = 'card element-card ' + ep.cls;
+    card.innerHTML = `
+      <div class="card-head">
+        <h2 class="card-title"><em>${ep.name}</em></h2>
+        <span class="card-sub" id="${scope}-el-card-sub-${ep.key}">Per-year · EUR</span>
+      </div>
+      <div class="element-results-grid">
+        <div>
+          <table class="metric-table">
+            <tbody id="${scope}-el-metrics-${ep.key}"></tbody>
+          </table>
+        </div>
+        <div class="chart-box">
+          <canvas id="${scope}-elementChart-${ep.key}"></canvas>
+        </div>
+      </div>
+    `;
+    elementCards.appendChild(card);
+  });
+
+  // Wire sliders (scoped to this root). All write to shared state and trigger
+  // a global recompute so the other page + variables table stay in sync.
+  root.querySelectorAll('input[type=range]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const key = e.target.dataset.key;
+      state[key] = Number(e.target.value);
+      if (key === 'P(M_j)') state['P(¬M_j)'] = 1 - state[key];
+      if (USER_SHARE_KEYS.includes(key)) updateEncounterShares(key);
+      setSliderValueAll(key);
+      recomputeAll();
+    });
+  });
+
+  $('reset-all').addEventListener('click', resetAll);
+
+  // === Model ===
+  function computeLambda() {
+    const s = state;
+    return s['I_y'] * s['N_bears'] * s['P(D_i|food)'];
+  }
+
+  function modelFor(elementKey, lambda) {
+    const s = state;
+    const lambda_i = lambda * s['s_enc_' + elementKey];
+    const N = s['N_' + elementKey];
+    const u = s['u_' + elementKey];
+    const c = s['c_' + elementKey];
+    const pD = s['P(D_' + elementKey + '|B,E)'];
+    const protShare = Math.max(0, Math.min(1, s['s_prot_' + elementKey]));
+    const cInst = s['c_install_' + elementKey];
+    const expectedUnits = pD * lambda_i * u;
+
+    function scenarioAt(share) {
+      const Nprot   = Math.min(Math.round(share * N), N);
+      const Nunprot = Math.max(0, N - Nprot);
+      const unprotUnits   = Math.min(expectedUnits * (1 - share),                Nunprot);
+      const residualUnits = Math.min(expectedUnits * share * s['P(¬M_j)'],       Nprot);
+      const unprotPerYr   = unprotUnits   * c;
+      const residualPerYr = residualUnits * c;
+      const maintPerYr    = s['c_maintenance_' + elementKey] * Nprot;
+      const installYr0    = cInst * Nprot;
+      return {
+        Nprot, Nunprot,
+        unprotPerYr, residualPerYr, maintPerYr, installYr0,
+        annualPerYr: unprotPerYr + residualPerYr + maintPerYr,
+      };
+    }
+
+    const noProt = scenarioAt(0);
+    const prot   = scenarioAt(protShare);
+
+    return {
+      lambda_i,
+      noProtPerYr:   noProt.annualPerYr,
+      unprotPerYr:   prot.unprotPerYr,
+      residualPerYr: prot.residualPerYr,
+      maintPerYr:    prot.maintPerYr,
+      installYr0:    prot.installYr0,
+      protPerYr:     prot.annualPerYr,
+      Nprot:         prot.Nprot,
+      Nunprot:       prot.Nunprot,
+    };
+  }
+
+  function cumInstallByYear(installYr0, t) {
+    const L = Math.max(1, Math.round(state['lifespan_j']));
+    return installYr0 * (1 + Math.floor(t / L));
+  }
+
+  function installDueInYear(t) {
+    const L = Math.max(1, Math.round(state['lifespan_j']));
+    return t === 0 || t % L === 0;
+  }
+
+  function timeSeries(model, T) {
+    const noProt = [];
+    const prot = [];
+    const net = [];
+    let cumulativeNet = 0;
+    for (let t = 0; t <= T; t++) {
+      const noProtCost = t === 0 ? 0 : model.noProtPerYr;
+      const protCost = (t === 0 ? 0 : model.protPerYr) + (installDueInYear(t) ? model.installYr0 : 0);
+      cumulativeNet += noProtCost - protCost;
+      noProt.push(noProtCost);
+      prot.push(protCost);
+      net.push(cumulativeNet);
+    }
+    return { noProt, prot, net };
+  }
+
+  // Charts (per-instance — DOM is per-instance even though state is shared)
+  const elementCharts = {};
+  ELEMENT_PANELS.forEach(ep => {
+    elementCharts[ep.key] = new Chart($('elementChart-' + ep.key), {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom', labels: lineLegendLabels },
+          tooltip: {
+            callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtMoney(ctx.raw) }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => fmtMoney(v) }, grid: { color: cssVar('--line') } },
+          x: { grid: { display: false }, title: { display: true, text: 'Year', color: cssVar('--ink-dim') } }
+        },
+        elements: { point: { radius: 2, hoverRadius: 5 }, line: { borderWidth: 2, tension: 0 } }
+      }
+    });
+  });
+
+  const overallChart = new Chart($('overallChart'), {
     type: 'line',
     data: { labels: [], datasets: [] },
     options: {
@@ -1151,30 +1701,215 @@ ELEMENT_PANELS.forEach(ep => {
         y: { beginAtZero: true, ticks: { callback: v => fmtMoney(v) }, grid: { color: cssVar('--line') } },
         x: { grid: { display: false }, title: { display: true, text: 'Year', color: cssVar('--ink-dim') } }
       },
-      elements: { point: { radius: 2, hoverRadius: 5 }, line: { borderWidth: 2, tension: 0 } }
+      elements: { point: { radius: 3, hoverRadius: 6 }, line: { borderWidth: 2.5, tension: 0 } }
     }
   });
-});
 
-const overallChart = new Chart(document.getElementById('overallChart'), {
-  type: 'line',
-  data: { labels: [], datasets: [] },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      legend: { position: 'bottom', labels: lineLegendLabels },
-      tooltip: {
-        callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtMoney(ctx.raw) }
-      }
-    },
-    scales: {
-      y: { beginAtZero: true, ticks: { callback: v => fmtMoney(v) }, grid: { color: cssVar('--line') } },
-      x: { grid: { display: false }, title: { display: true, text: 'Year', color: cssVar('--ink-dim') } }
-    },
-    elements: { point: { radius: 3, hoverRadius: 6 }, line: { borderWidth: 2.5, tension: 0 } }
+  function applyChartTheme() {
+    Object.values(elementCharts).forEach(chart => {
+      chart.options.scales.y.grid.color = cssVar('--line');
+      chart.options.scales.x.title.color = cssVar('--ink-dim');
+    });
+    overallChart.options.scales.y.grid.color = cssVar('--line');
+    overallChart.options.scales.x.title.color = cssVar('--ink-dim');
+    recompute();
   }
-});
+
+  function recompute() {
+    const lambda = computeLambda();
+    const T = Math.round(state['T']);
+
+    $('lambda-value').textContent = lambda.toFixed(2) + ' / yr';
+
+    const elements = ELEMENT_PANELS.map(ep => ({
+      ...ep,
+      m: modelFor(ep.key, lambda),
+      color: elementColor(ep.key)
+    }));
+
+    elements.forEach(({key, m}) => {
+      $('events-' + key).innerHTML =
+        `<span>Expected encounters / year</span><strong>${m.lambda_i.toFixed(2)}</strong>`;
+    });
+
+    const labels = Array.from({length: T+1}, (_, t) => t);
+    elements.forEach(({key, name, m, color}) => {
+      const cumNoProt = m.noProtPerYr * T;
+      const cumProt = cumInstallByYear(m.installYr0, T) + m.protPerYr * T;
+      const benefit = cumNoProt - cumProt;
+      const better = benefit > 0;
+
+      const tbody = $('el-metrics-' + key);
+      tbody.innerHTML = `
+        <tr>
+          <td class="label">Expected encounters / year</td>
+          <td class="value">${m.lambda_i.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td class="label">Annual loss without protection</td>
+          <td class="value loss">${fmtMoney(m.noProtPerYr)} / yr</td>
+        </tr>
+        <tr>
+          <td class="label">Annual cost with protection</td>
+          <td class="value">${fmtMoney(m.protPerYr)} / yr</td>
+        </tr>
+        <tr>
+          <td class="label indent">— Losses from unprotected units</td>
+          <td class="value">${fmtMoney(m.unprotPerYr)} / yr</td>
+        </tr>
+        <tr>
+          <td class="label indent">— Losses from non-maintained infrastructure</td>
+          <td class="value">${fmtMoney(m.residualPerYr)} / yr</td>
+        </tr>
+        <tr>
+          <td class="label indent">— Maintenance</td>
+          <td class="value">${fmtMoney(m.maintPerYr)} / yr</td>
+        </tr>
+        <tr>
+          <td class="label">Installation (per cycle)</td>
+          <td class="value">${fmtMoney(m.installYr0)}</td>
+        </tr>
+        <tr>
+          <td class="label">Cumulative — no protection</td>
+          <td class="value loss">${fmtMoney(cumNoProt)}</td>
+        </tr>
+        <tr>
+          <td class="label">Cumulative — with protection</td>
+          <td class="value">${fmtMoney(cumProt)}</td>
+        </tr>
+        <tr>
+          <td class="label">Net benefit at year ${T}</td>
+          <td class="value ${better?'savings':'loss'}">${(better?'+':'')+fmtMoney(benefit)}</td>
+        </tr>
+        <tr>
+          <td class="label">Recommendation</td>
+          <td class="value"><span class="verdict-pill ${better?'protect':'compensate'}">${better?'Protect':'Compensate'}</span></td>
+        </tr>
+      `;
+
+      $('el-card-sub-' + key).textContent = `Per-year · ${T}-year horizon`;
+
+      const ts = timeSeries(m, T);
+      const inkDim = cssVar('--ink-dim');
+      const chart = elementCharts[key];
+      chart.data.labels = labels;
+      chart.data.datasets = [
+        {
+          label: 'No protection',
+          data: ts.noProt,
+          borderColor: inkDim,
+          backgroundColor: inkDim + '20',
+          borderDash: [5, 3],
+          fill: false
+        },
+        {
+          label: 'With protection',
+          data: ts.prot,
+          borderColor: color,
+          backgroundColor: color + '40',
+          fill: false
+        },
+        {
+          label: 'Net benefit (no-prot − prot)',
+          data: ts.net,
+          borderColor: color,
+          backgroundColor: color + '18',
+          fill: 'origin',
+          borderWidth: 1.5,
+          borderDash: [2, 3]
+        }
+      ];
+      chart.update();
+    });
+
+    const aggNoProt = [], aggProt = [], aggNet = [];
+    let cumulativeAggNet = 0;
+    for (let t = 0; t <= T; t++) {
+      let n = 0, p = 0;
+      elements.forEach(({m}) => {
+        n += t === 0 ? 0 : m.noProtPerYr;
+        p += (t === 0 ? 0 : m.protPerYr) + (installDueInYear(t) ? m.installYr0 : 0);
+      });
+      cumulativeAggNet += n - p;
+      aggNoProt.push(n);
+      aggProt.push(p);
+      aggNet.push(cumulativeAggNet);
+    }
+    const dangerColor = cssVar('--accent-danger');
+    const successColor = cssVar('--accent-success');
+    const accentColor = cssVar('--accent');
+    overallChart.data.labels = labels;
+    overallChart.data.datasets = [
+      {
+        label: 'Annual cost — no protection',
+        data: aggNoProt,
+        borderColor: dangerColor,
+        backgroundColor: dangerColor + '14',
+        fill: false
+      },
+      {
+        label: 'Annual cost — with protection',
+        data: aggProt,
+        borderColor: successColor,
+        backgroundColor: successColor + '14',
+        fill: false
+      },
+      {
+        label: 'Net benefit (no-prot − prot)',
+        data: aggNet,
+        borderColor: accentColor,
+        backgroundColor: accentColor + '1A',
+        fill: 'origin',
+        borderWidth: 1.5,
+        borderDash: [2, 3]
+      }
+    ];
+    overallChart.update();
+
+    // Verdict (shared header element). Both instances write the same value.
+    const finalNet = aggNet[T];
+    const valueEl = document.getElementById('verdict-value');
+    const detailEl = document.getElementById('verdict-detail');
+    const labelEl = document.getElementById('verdict-label');
+    if (labelEl) labelEl.textContent = `Net Outcome at Year ${T}`;
+
+    let crossover = null;
+    let runningNoProt = 0;
+    let runningProt = 0;
+    for (let t = 0; t <= T; t++) {
+      runningNoProt += aggNoProt[t];
+      runningProt += aggProt[t];
+      if (runningProt < runningNoProt) { crossover = t; break; }
+    }
+
+    if (valueEl && detailEl) {
+      if (finalNet > 0) {
+        valueEl.textContent = '+' + fmtMoney(finalNet);
+        valueEl.className = 'verdict-value verdict-savings';
+        detailEl.textContent = crossover !== null
+          ? `Protection pays off from year ${crossover}`
+          : 'Protection is cost-beneficial';
+      } else if (finalNet < 0) {
+        valueEl.textContent = fmtMoney(finalNet);
+        valueEl.className = 'verdict-value verdict-loss';
+        detailEl.textContent = 'Compensation is cheaper over this horizon';
+      } else {
+        valueEl.textContent = '€0';
+        valueEl.className = 'verdict-value';
+        detailEl.textContent = 'Break-even';
+      }
+    }
+
+    $('overall-card-sub').textContent = `Per-year · ${T}-year horizon`;
+  }
+
+  modelInstances.push({ scope, recompute, applyChartTheme });
+  return { recompute, applyChartTheme };
+}
+
+// === Theme ===
+const THEME_KEY = 'bear-theme';
+const themeToggle = document.getElementById('theme-toggle');
 
 function syncThemeToggle() {
   if (!themeToggle) return;
@@ -1186,19 +1921,10 @@ function syncThemeToggle() {
   if (label) label.textContent = isLight ? 'Theme: Light' : 'Theme: Dark';
 }
 
-function applyChartTheme() {
+function applyAllChartThemes() {
   Chart.defaults.color = cssVar('--ink-dim');
   Chart.defaults.borderColor = cssVar('--line');
-
-  Object.values(elementCharts).forEach(chart => {
-    chart.options.scales.y.grid.color = cssVar('--line');
-    chart.options.scales.x.title.color = cssVar('--ink-dim');
-  });
-  overallChart.options.scales.y.grid.color = cssVar('--line');
-  overallChart.options.scales.x.title.color = cssVar('--ink-dim');
-
-  // Re-run so dataset colours pick up the theme's CSS-var values.
-  if (typeof recompute === 'function') recompute();
+  modelInstances.forEach(i => i.applyChartTheme());
 }
 
 function setTheme(theme) {
@@ -1209,7 +1935,7 @@ function setTheme(theme) {
     // The theme still changes even if the browser blocks localStorage.
   }
   syncThemeToggle();
-  applyChartTheme();
+  applyAllChartThemes();
 }
 
 syncThemeToggle();
@@ -1221,225 +1947,12 @@ if (themeToggle) {
   });
 }
 
-// Cumulative installation outlay through year t.
-// Installation is paid at year 0 and re-paid every lifespan_j years (re-investment).
-function cumInstallByYear(installYr0, t) {
-  const L = Math.max(1, Math.round(state['lifespan_j']));
-  return installYr0 * (1 + Math.floor(t / L));
-}
-
-function installDueInYear(t) {
-  const L = Math.max(1, Math.round(state['lifespan_j']));
-  return t === 0 || t % L === 0;
-}
-
-// Build per-year cost series plus cumulative net benefit for one element.
-function timeSeries(model, T) {
-  const noProt = [];
-  const prot = [];
-  const net = [];
-  let cumulativeNet = 0;
-  for (let t = 0; t <= T; t++) {
-    const noProtCost = t === 0 ? 0 : model.noProtPerYr;
-    const protCost = (t === 0 ? 0 : model.protPerYr) + (installDueInYear(t) ? model.installYr0 : 0);
-    cumulativeNet += noProtCost - protCost;
-    noProt.push(noProtCost);
-    prot.push(protCost);
-    net.push(cumulativeNet);
-  }
-  return { noProt, prot, net };
-}
-
-function recompute() {
-  const lambda = computeLambda();
-  const T = Math.round(state['T']);
-
-  document.getElementById('lambda-value').textContent = lambda.toFixed(2) + ' / yr';
-
-  const elements = ELEMENT_PANELS.map(ep => ({
-    ...ep,
-    m: modelFor(ep.key, lambda),
-    color: elementColor(ep.key)
-  }));
-
-  // Update per-element event count display
-  elements.forEach(({key, m}) => {
-    document.getElementById('events-' + key).innerHTML =
-      `<span>Expected events / year</span><strong>${m.lambda_i.toFixed(2)}</strong>`;
-  });
-
-  // Per-element tables and charts
-  const labels = Array.from({length: T+1}, (_, t) => t);
-  elements.forEach(({key, name, m, color}) => {
-    const cumNoProt = m.noProtPerYr * T;
-    const cumProt = cumInstallByYear(m.installYr0, T) + m.protPerYr * T;
-    const benefit = cumNoProt - cumProt;
-    const better = benefit > 0;
-
-    const tbody = document.getElementById('el-metrics-' + key);
-    tbody.innerHTML = `
-      <tr>
-        <td class="label">Expected events / year</td>
-        <td class="value">${m.lambda_i.toFixed(2)}</td>
-      </tr>
-      <tr>
-        <td class="label">Annual loss without protection</td>
-        <td class="value loss">${fmtMoney(m.noProtPerYr)} / yr</td>
-      </tr>
-      <tr>
-        <td class="label">Annual cost with protection</td>
-        <td class="value">${fmtMoney(m.protPerYr)} / yr</td>
-      </tr>
-      <tr>
-        <td class="label indent">— Losses from unprotected units</td>
-        <td class="value">${fmtMoney(m.unprotPerYr)} / yr</td>
-      </tr>
-      <tr>
-        <td class="label indent">— Losses from non-maintained infrastructure</td>
-        <td class="value">${fmtMoney(m.residualPerYr)} / yr</td>
-      </tr>
-      <tr>
-        <td class="label indent">— Maintenance</td>
-        <td class="value">${fmtMoney(m.maintPerYr)} / yr</td>
-      </tr>
-      <tr>
-        <td class="label">Installation (per cycle)</td>
-        <td class="value">${fmtMoney(m.installYr0)}</td>
-      </tr>
-      <tr>
-        <td class="label">Cumulative — no protection</td>
-        <td class="value loss">${fmtMoney(cumNoProt)}</td>
-      </tr>
-      <tr>
-        <td class="label">Cumulative — with protection</td>
-        <td class="value">${fmtMoney(cumProt)}</td>
-      </tr>
-      <tr>
-        <td class="label">Net benefit at year ${T}</td>
-        <td class="value ${better?'savings':'loss'}">${(better?'+':'')+fmtMoney(benefit)}</td>
-      </tr>
-      <tr>
-        <td class="label">Recommendation</td>
-        <td class="value"><span class="verdict-pill ${better?'protect':'compensate'}">${better?'Protect':'Compensate'}</span></td>
-      </tr>
-    `;
-
-    document.getElementById('el-card-sub-' + key).textContent = `Per-year · ${T}-year horizon`;
-
-    const ts = timeSeries(m, T);
-    const chart = elementCharts[key];
-    chart.data.labels = labels;
-    chart.data.datasets = [
-      {
-        label: 'No protection',
-        data: ts.noProt,
-        borderColor: color,
-        backgroundColor: color + '20',
-        borderDash: [5, 3],
-        fill: false
-      },
-      {
-        label: 'With protection',
-        data: ts.prot,
-        borderColor: color,
-        backgroundColor: color + '40',
-        fill: false
-      },
-      {
-        label: 'Net benefit (no-prot − prot)',
-        data: ts.net,
-        borderColor: color,
-        backgroundColor: color + '18',
-        fill: 'origin',
-        borderWidth: 1.5,
-        borderDash: [2, 3]
-      }
-    ];
-    chart.update();
-  });
-
-  // Overall chart: annual total costs plus cumulative net benefit area
-  const aggNoProt = [], aggProt = [], aggNet = [];
-  let cumulativeAggNet = 0;
-  for (let t = 0; t <= T; t++) {
-    let n = 0, p = 0;
-    elements.forEach(({m}) => {
-      n += t === 0 ? 0 : m.noProtPerYr;
-      p += (t === 0 ? 0 : m.protPerYr) + (installDueInYear(t) ? m.installYr0 : 0);
-    });
-    cumulativeAggNet += n - p;
-    aggNoProt.push(n);
-    aggProt.push(p);
-    aggNet.push(cumulativeAggNet);
-  }
-  const dangerColor = cssVar('--accent-danger');
-  const successColor = cssVar('--accent-success');
-  const accentColor = cssVar('--accent');
-  overallChart.data.labels = labels;
-  overallChart.data.datasets = [
-    {
-      label: 'Annual cost — no protection',
-      data: aggNoProt,
-      borderColor: dangerColor,
-      backgroundColor: dangerColor + '14',
-      fill: false
-    },
-    {
-      label: 'Annual cost — with protection',
-      data: aggProt,
-      borderColor: successColor,
-      backgroundColor: successColor + '14',
-      fill: false
-    },
-    {
-      label: 'Net benefit (no-prot − prot)',
-      data: aggNet,
-      borderColor: accentColor,
-      backgroundColor: accentColor + '1A',
-      fill: 'origin',
-      borderWidth: 1.5,
-      borderDash: [2, 3]
-    }
-  ];
-  overallChart.update();
-
-  // Verdict stays cumulative over the selected horizon.
-  const finalNet = aggNet[T];
-  const valueEl = document.getElementById('verdict-value');
-  const detailEl = document.getElementById('verdict-detail');
-  const labelEl = document.getElementById('verdict-label');
-  labelEl.textContent = `Net Outcome at Year ${T}`;
-
-  // Find crossover year (where cumulative protected cost first drops below no-protection cost).
-  let crossover = null;
-  let runningNoProt = 0;
-  let runningProt = 0;
-  for (let t = 0; t <= T; t++) {
-    runningNoProt += aggNoProt[t];
-    runningProt += aggProt[t];
-    if (runningProt < runningNoProt) { crossover = t; break; }
-  }
-
-  if (finalNet > 0) {
-    valueEl.textContent = '+' + fmtMoney(finalNet);
-    valueEl.className = 'verdict-value verdict-savings';
-    detailEl.textContent = crossover !== null
-      ? `Protection pays off from year ${crossover}`
-      : 'Protection is cost-beneficial';
-  } else if (finalNet < 0) {
-    valueEl.textContent = fmtMoney(finalNet);
-    valueEl.className = 'verdict-value verdict-loss';
-    detailEl.textContent = 'Compensation is cheaper over this horizon';
-  } else {
-    valueEl.textContent = '€0';
-    valueEl.className = 'verdict-value';
-    detailEl.textContent = 'Break-even';
-  }
-
-  document.getElementById('overall-card-sub').textContent = `Per-year · ${T}-year horizon`;
-}
-
-recompute();
+// === Init ===
+setupTabs();
+buildVariablesTable();
+mountModel('cm');
+mountModel('sm');
+recomputeAll();
 </script>
 </body>
 </html>
