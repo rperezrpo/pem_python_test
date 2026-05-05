@@ -499,6 +499,10 @@
   .general-row-bear .control:nth-child(4) {
     grid-column-start: 1;
   }
+  /* Simple View: bear pressure has only two sliders — let them fill the row. */
+  #model-sm .general-row-bear {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   @media (max-width: 900px) {
     .general-row,
     .general-row-bear {
