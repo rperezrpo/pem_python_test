@@ -26,7 +26,7 @@
 
     --bg:           #f7f0dc;
     --panel:        #fffaea;
-    --panel-2:      #d1e7d2;
+    --panel-2:      #dde1da;
     --ink:          #221f16;
     --ink-dim:      #6e6754;
     --ink-strong:   #14110a;
@@ -115,7 +115,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--panel-2);
+    background: var(--panel);
     border: 1px solid var(--line);
     color: var(--ink);
     padding: 10px 14px;

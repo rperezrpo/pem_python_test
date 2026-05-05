@@ -560,14 +560,15 @@ function recompute() {
     document.getElementById('el-card-sub-' + key).textContent = `Per-year · ${T}-year horizon`;
 
     const ts = timeSeries(m, T);
+    const inkDim = cssVar('--ink-dim');
     const chart = elementCharts[key];
     chart.data.labels = labels;
     chart.data.datasets = [
       {
         label: 'No protection',
         data: ts.noProt,
-        borderColor: color,
-        backgroundColor: color + '20',
+        borderColor: inkDim,
+        backgroundColor: inkDim + '20',
         borderDash: [5, 3],
         fill: false
       },

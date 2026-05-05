@@ -48,7 +48,7 @@
 
     --bg:           #f7f0dc;
     --panel:        #fffaea;
-    --panel-2:      #f0e6c8;
+    --panel-2:      #d1e7d2;
     --ink:          #221f16;
     --ink-dim:      #6e6754;
     --ink-strong:   #14110a;
@@ -1329,14 +1329,15 @@ function recompute() {
     document.getElementById('el-card-sub-' + key).textContent = `Per-year · ${T}-year horizon`;
 
     const ts = timeSeries(m, T);
+    const inkDim = cssVar('--ink-dim');
     const chart = elementCharts[key];
     chart.data.labels = labels;
     chart.data.datasets = [
       {
         label: 'No protection',
         data: ts.noProt,
-        borderColor: color,
-        backgroundColor: color + '20',
+        borderColor: inkDim,
+        backgroundColor: inkDim + '20',
         borderDash: [5, 3],
         fill: false
       },
