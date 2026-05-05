@@ -78,6 +78,67 @@
       radial-gradient(ellipse at bottom left, rgba(107,142,90,0.06), transparent 50%);
     min-height: 100vh;
   }
+  /* ====== Site header (sticky nav bar) ====== */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .site-header-inner {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: stretch;
+    height: 52px;
+    gap: 0;
+  }
+  .site-brand {
+    display: flex;
+    align-items: center;
+    padding-right: 28px;
+    border-right: 1px solid var(--line);
+    margin-right: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .site-header .eyebrow {
+    margin-bottom: 0;
+  }
+  .site-header .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    padding-left: 16px;
+  }
+  .site-header .tabs {
+    border-bottom: none;
+    margin-bottom: 0;
+    gap: 0;
+    align-items: stretch;
+    flex: 1;
+  }
+  .site-header .tabs button {
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 0 18px;
+    height: 100%;
+    background: transparent;
+  }
+  .site-header .tabs button:hover {
+    border-bottom-color: var(--accent);
+    color: var(--ink);
+  }
+  .site-header .tabs button.active {
+    border-bottom-color: var(--accent);
+    background: transparent;
+    color: var(--accent);
+  }
   .wrap {
     max-width: 1500px;
     margin: 0 auto;
@@ -131,10 +192,6 @@
     gap: 18px;
   }
   .header-controls {
-    position: fixed;
-    top: 16px;
-    right: max(32px, calc((100vw - 1500px) / 2 + 32px));
-    z-index: 200;
     display: flex;
     gap: 8px;
     align-items: center;
@@ -142,9 +199,9 @@
   .guide-btn {
     display: inline-flex;
     align-items: center;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    color: var(--ink-dim);
+    background: color-mix(in srgb, var(--element-small) 40%, transparent);
+    border: 1px solid var(--element-small);
+    color: var(--ink);
     padding: 10px 14px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
@@ -155,13 +212,13 @@
     border-radius: 3px;
   }
   .guide-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--ink-strong);
+    color: var(--ink-strong);
   }
   .guide-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--panel-2);
+    border-color: var(--element-small);
+    color: var(--bg);
+    background: color-mix(in srgb, var(--element-small) 70%, transparent);
   }
   .theme-toggle {
     display: inline-flex;
@@ -831,18 +888,27 @@
 </head>
 <body>
 
-<div class="wrap">
-  <div class="header-controls">
-    <button class="guide-btn" id="guide-btn" type="button" data-page="guide">Guide</button>
-    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-      <span class="theme-toggle-icon" aria-hidden="true"></span>
-      <span class="theme-toggle-text">Theme: Dark</span>
-    </button>
+<div class="site-header">
+  <div class="site-header-inner">
+    <span class="eyebrow site-brand">Ursus &middot; Cost-Benefit Model</span>
+    <nav class="tabs" role="tablist">
+      <button type="button" data-page="table">Data Source</button>
+      <button type="button" data-page="simple">Simple Model</button>
+      <button type="button" data-page="complete">Complete Model</button>
+    </nav>
+    <div class="header-controls">
+      <button class="guide-btn active" id="guide-btn" type="button" data-page="guide">Guide</button>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+        <span class="theme-toggle-icon" aria-hidden="true"></span>
+        <span class="theme-toggle-text">Theme: Dark</span>
+      </button>
+    </div>
   </div>
+</div>
 
+<div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">Ursus &middot; Cost-Benefit Model</div>
       <h1>To <em>protect</em>,<br>or to compensate?</h1>
       <p class="subtitle">An interactive cost benefit analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages.</p>
     </div>
@@ -854,13 +920,6 @@
       </div>
     </div>
   </header>
-
-  <!-- Page navigation -->
-  <nav class="tabs" role="tablist">
-    <button type="button" data-page="table">Data Source</button>
-    <button type="button" data-page="simple">Simple Model</button>
-    <button type="button" data-page="complete" class="active">Complete Model</button>
-  </nav>
 
   <!-- Page: Variables table -->
   <section class="page" id="page-table">
@@ -952,7 +1011,7 @@
   </section>
 
   <!-- Page: Complete Model -->
-  <section class="page active" id="page-complete">
+  <section class="page" id="page-complete">
     <div id="model-cm" class="model-root">
       <section class="panel">
         <div class="panel-head-row">
@@ -1023,7 +1082,7 @@
   </section>
 
   <!-- Page: Guide -->
-  <section class="page" id="page-guide">
+  <section class="page active" id="page-guide">
     <div class="guide-grid">
 
       <div class="card">
@@ -1438,7 +1497,7 @@ function mountModel(scope) {
   lambdaBox.innerHTML = `
     <div class="lambda-label">
       Expected encounters per year
-      <span class="lambda-formula">lambda = I_y * N_bears * food</span>
+      <span class="lambda-formula">${scope === 'sm' ? 'lambda = I_y * N_bears' : 'lambda = I_y * N_bears * food'}</span>
     </div>
     <div class="lambda-value" id="${scope}-lambda-value">-</div>
   `;

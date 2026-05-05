@@ -350,7 +350,7 @@ function mountModel(scope) {
   lambdaBox.innerHTML = `
     <div class="lambda-label">
       Expected encounters per year
-      <span class="lambda-formula">lambda = I_y * N_bears * food</span>
+      <span class="lambda-formula">${scope === 'sm' ? 'lambda = I_y * N_bears' : 'lambda = I_y * N_bears * food'}</span>
     </div>
     <div class="lambda-value" id="${scope}-lambda-value">-</div>
   `;

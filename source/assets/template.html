@@ -25,18 +25,27 @@ __STYLES__
 </head>
 <body>
 
-<div class="wrap">
-  <div class="header-controls">
-    <button class="guide-btn" id="guide-btn" type="button" data-page="guide">Guide</button>
-    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-      <span class="theme-toggle-icon" aria-hidden="true"></span>
-      <span class="theme-toggle-text">Theme: Dark</span>
-    </button>
+<div class="site-header">
+  <div class="site-header-inner">
+    <span class="eyebrow site-brand">Ursus &middot; Cost-Benefit Model</span>
+    <nav class="tabs" role="tablist">
+      <button type="button" data-page="table">Data Source</button>
+      <button type="button" data-page="simple">Simple Model</button>
+      <button type="button" data-page="complete">Complete Model</button>
+    </nav>
+    <div class="header-controls">
+      <button class="guide-btn active" id="guide-btn" type="button" data-page="guide">Guide</button>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+        <span class="theme-toggle-icon" aria-hidden="true"></span>
+        <span class="theme-toggle-text">Theme: Dark</span>
+      </button>
+    </div>
   </div>
+</div>
 
+<div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">Ursus &middot; Cost-Benefit Model</div>
       <h1>To <em>protect</em>,<br>or to compensate?</h1>
       <p class="subtitle">An interactive cost benefit analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages.</p>
     </div>
@@ -48,13 +57,6 @@ __STYLES__
       </div>
     </div>
   </header>
-
-  <!-- Page navigation -->
-  <nav class="tabs" role="tablist">
-    <button type="button" data-page="table">Data Source</button>
-    <button type="button" data-page="simple">Simple Model</button>
-    <button type="button" data-page="complete" class="active">Complete Model</button>
-  </nav>
 
   <!-- Page: Variables table -->
   <section class="page" id="page-table">
@@ -146,7 +148,7 @@ __STYLES__
   </section>
 
   <!-- Page: Complete Model -->
-  <section class="page active" id="page-complete">
+  <section class="page" id="page-complete">
     <div id="model-cm" class="model-root">
       <section class="panel">
         <div class="panel-head-row">
@@ -217,7 +219,7 @@ __STYLES__
   </section>
 
   <!-- Page: Guide -->
-  <section class="page" id="page-guide">
+  <section class="page active" id="page-guide">
     <div class="guide-grid">
 
       <div class="card">
