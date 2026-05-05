@@ -4,26 +4,23 @@ const DEFAULTS = JSON.parse(JSON.stringify(VARIABLES));
 // === Slider configuration ===
 const SLIDER_CONFIG = {
   // --- General: Bear pressure ---
-  "I_y":           {min:0, max:10000,step:50,   fmt:'int',  section:'general:bear'},
-  "P(B)":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:bear'},
-  "P(E|B)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:bear'},
+  "I_y":           {min:0, max:500,  step:10,   fmt:'int',  section:'general:bear'},
+  "N_bears":       {min:0, max:50,  step:1,    fmt:'int',  section:'general:bear'},
 
   // --- General: Environment modifiers ---
   "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
-  "P(D_i|density)":{min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
 
   // --- General: Protective measure ---
   "P(M_j)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:measure'},
-  "c_maintenance_j":{min:0, max:100, step:1,    fmt:'eur',  section:'general:measure'},
   "lifespan_j":    {min:1, max:30,   step:1,    fmt:'yr',   section:'general:measure'},
 
   // --- General: Time horizon ---
   "T":             {min:1, max:50,   step:1,    fmt:'yr',   section:'general:time'},
 
   // --- General: Distribution of encounters by element type ---
-  "s_SL":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
-  "s_LL":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
-  "s_Ag":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
+  "s_enc_SL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
+  "s_enc_LL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
+  "s_enc_Ag":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
 
   // --- Per-element: Small Livestock ---
   "P(D_SL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
@@ -32,6 +29,7 @@ const SLIDER_CONFIG = {
   "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
   "s_prot_SL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
   "c_install_SL":  {min:0, max:500,  step:5,    fmt:'eur',  section:'SL'},
+  "c_maintenance_SL":{min:0, max:100, step:1,   fmt:'eur',  section:'SL'},
 
   // --- Per-element: Large Livestock ---
   "P(D_LL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
@@ -40,6 +38,7 @@ const SLIDER_CONFIG = {
   "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
   "s_prot_LL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
   "c_install_LL":  {min:0, max:1000, step:10,   fmt:'eur',  section:'LL'},
+  "c_maintenance_LL":{min:0, max:200, step:1,   fmt:'eur',  section:'LL'},
 
   // --- Per-element: Agriculture ---
   "P(D_Ag|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
@@ -48,13 +47,14 @@ const SLIDER_CONFIG = {
   "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
   "s_prot_Ag":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
   "c_install_Ag":  {min:0, max:500,  step:5,    fmt:'eur',  section:'Ag'},
+  "c_maintenance_Ag":{min:0, max:100, step:1,   fmt:'eur',  section:'Ag'},
 };
 
 const GENERAL_SUBSECTIONS = [
   { id: 'time',        label: 'Time horizon' },
   { id: 'bear',        label: 'Bear pressure' },
   { id: 'measure',     label: 'Protective measure' },
-  { id: 'attack-share', label: 'Distribution of encounters by element type' }
+  { id: 'encounter-share', label: 'Distribution of encounters by element type' }
 ];
 
 const ELEMENT_PANELS = [
@@ -92,6 +92,8 @@ function cssVar(name) {
 let state = {};
 VARIABLES.forEach(v => { state[v.notation] = Number(v.value); });
 state['P(¬M_j)'] = 1 - state['P(M_j)'];
+delete state['P(B)'];
+delete state['P(E|B)'];
 
 function getVar(notation) {
   return VARIABLES.find(v => v.notation === notation);
@@ -102,10 +104,10 @@ function renderControl(notation) {
   const cfg = SLIDER_CONFIG[notation];
   const v = getVar(notation);
   if (!v) return '';
-  const isAutoShare = notation === 's_Ag';
-  const disabledAttr = isAutoShare ? ' disabled aria-describedby="auto-share-s_Ag"' : '';
+  const isAutoShare = notation === 's_enc_Ag';
+  const disabledAttr = isAutoShare ? ' disabled aria-describedby="auto-share-s_enc_Ag"' : '';
   const autoNote = isAutoShare
-    ? '<span class="control-note" id="auto-share-s_Ag">Calculated from the other attack shares</span>'
+    ? '<span class="control-note" id="auto-share-s_enc_Ag">Calculated from the other encounter shares</span>'
     : '';
   return `
     <div class="control${isAutoShare ? ' control-auto' : ''}" title="${(v.description || '').replace(/"/g, '&quot;')}">
@@ -126,7 +128,7 @@ lambdaBox.className = 'lambda-display';
 lambdaBox.innerHTML = `
   <div class="lambda-label">
     Expected encounters per year
-    <span class="lambda-formula">lambda = I_y * P(B) * P(E|B) * food * density</span>
+    <span class="lambda-formula">lambda = I_y * N_bears * food</span>
   </div>
   <div class="lambda-value" id="lambda-value">-</div>
 `;
@@ -163,7 +165,7 @@ ELEMENT_PANELS.forEach(ep => {
       <span class="element-panel-tag">${ep.tag}</span>
     </div>
     <div class="element-events" id="events-${ep.key}">
-      <span>Expected events / year</span><strong>—</strong>
+      <span>Expected encounters / year</span><strong>—</strong>
     </div>
     ${items.map(renderControl).join('')}
   `;
@@ -194,9 +196,9 @@ ELEMENT_PANELS.forEach(ep => {
   elementCards.appendChild(card);
 });
 
-// === Attack share sliders ===
-const USER_SHARE_KEYS = ['s_SL', 's_LL'];
-const AUTO_SHARE_KEY = 's_Ag';
+// === Encounter share sliders ===
+const USER_SHARE_KEYS = ['s_enc_SL', 's_enc_LL'];
+const AUTO_SHARE_KEY = 's_enc_Ag';
 
 function setSliderValue(key) {
   const inp = document.querySelector(`input[data-key="${key}"]`);
@@ -205,27 +207,27 @@ function setSliderValue(key) {
   if (valEl) valEl.textContent = fmt[SLIDER_CONFIG[key].fmt](state[key]);
 }
 
-function updateAttackShares(changedKey) {
+function updateEncounterShares(changedKey) {
   if (!USER_SHARE_KEYS.includes(changedKey)) return;
   const otherKey = USER_SHARE_KEYS.find(k => k !== changedKey);
   const maxForChanged = Math.max(0, 1 - state[otherKey]);
 
   state[changedKey] = Math.min(Math.max(0, state[changedKey]), maxForChanged);
-  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_SL'] - state['s_LL']);
+  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_enc_SL'] - state['s_enc_LL']);
 
   setSliderValue(changedKey);
   setSliderValue(AUTO_SHARE_KEY);
 }
 
-function resetAttackSharesFromDefaults() {
+function resetEncounterSharesFromDefaults() {
   const userSum = USER_SHARE_KEYS.reduce((sum, key) => sum + state[key], 0);
   if (userSum > 1) {
     USER_SHARE_KEYS.forEach(key => { state[key] = state[key] / userSum; });
   }
-  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_SL'] - state['s_LL']);
+  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_enc_SL'] - state['s_enc_LL']);
 }
 
-resetAttackSharesFromDefaults();
+resetEncounterSharesFromDefaults();
 [...USER_SHARE_KEYS, AUTO_SHARE_KEY].forEach(setSliderValue);
 
 // === Wire up sliders ===
@@ -234,7 +236,7 @@ document.querySelectorAll('input[type=range]').forEach(inp => {
     const key = e.target.dataset.key;
     state[key] = Number(e.target.value);
     if (key === 'P(M_j)') state['P(¬M_j)'] = 1 - state[key];
-    if (USER_SHARE_KEYS.includes(key)) updateAttackShares(key);
+    if (USER_SHARE_KEYS.includes(key)) updateEncounterShares(key);
     setSliderValue(key);
     recompute();
   });
@@ -243,7 +245,7 @@ document.querySelectorAll('input[type=range]').forEach(inp => {
 document.getElementById('reset-all').addEventListener('click', () => {
   DEFAULTS.forEach(v => { state[v.notation] = Number(v.value); });
   state['P(¬M_j)'] = 1 - state['P(M_j)'];
-  resetAttackSharesFromDefaults();
+  resetEncounterSharesFromDefaults();
   document.querySelectorAll('input[type=range]').forEach(inp => {
     const k = inp.dataset.key;
     setSliderValue(k);
@@ -255,12 +257,12 @@ document.getElementById('reset-all').addEventListener('click', () => {
 // Element-level damage probability P(D_i|B,E) is applied downstream per element.
 function computeLambda() {
   const s = state;
-  return s['I_y'] * s['P(B)'] * s['P(E|B)'] * s['P(D_i|food)'] * s['P(D_i|density)'];
+  return s['I_y'] * s['N_bears'] * s['P(D_i|food)'];
 }
 
 function modelFor(elementKey, lambda) {
   const s = state;
-  const lambda_i = lambda * s['s_' + elementKey];
+  const lambda_i = lambda * s['s_enc_' + elementKey];
   const N = s['N_' + elementKey];
   const u = s['u_' + elementKey];
   const c = s['c_' + elementKey];
@@ -283,7 +285,7 @@ function modelFor(elementKey, lambda) {
     const residualUnits = Math.min(expectedUnits * share * s['P(¬M_j)'],       Nprot);
     const unprotPerYr   = unprotUnits   * c;
     const residualPerYr = residualUnits * c;
-    const maintPerYr    = s['c_maintenance_j'] * Nprot;
+    const maintPerYr    = s['c_maintenance_' + elementKey] * Nprot;
     const installYr0    = cInst * Nprot;
     return {
       Nprot, Nunprot,
@@ -496,7 +498,7 @@ function recompute() {
   // Update per-element event count display
   elements.forEach(({key, m}) => {
     document.getElementById('events-' + key).innerHTML =
-      `<span>Expected events / year</span><strong>${m.lambda_i.toFixed(2)}</strong>`;
+      `<span>Expected encounters / year</span><strong>${m.lambda_i.toFixed(2)}</strong>`;
   });
 
   // Per-element tables and charts
@@ -510,7 +512,7 @@ function recompute() {
     const tbody = document.getElementById('el-metrics-' + key);
     tbody.innerHTML = `
       <tr>
-        <td class="label">Expected events / year</td>
+        <td class="label">Expected encounters / year</td>
         <td class="value">${m.lambda_i.toFixed(2)}</td>
       </tr>
       <tr>

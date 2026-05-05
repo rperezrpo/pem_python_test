@@ -480,12 +480,12 @@
   /* ====== element results: table on left, chart on right ====== */
   .element-results-grid {
     display: grid;
-    grid-template-columns: 480px 1fr;
+    grid-template-columns: 480px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
   }
   @media (max-width: 1100px) {
-    .element-results-grid { grid-template-columns: 1fr; }
+    .element-results-grid { grid-template-columns: minmax(0, 1fr); }
   }
 
   .summary-table {
@@ -587,7 +587,7 @@
     font-size: 12px;
   }
 
-  .chart-box { position: relative; height: 360px; }
+  .chart-box { position: relative; height: 360px; min-width: 0; }
   .chart-box.tall { height: 440px; }
 
   .footer {
@@ -723,12 +723,12 @@
         <summary>Show formulas used</summary>
         <div class="formula">
           <b>1. Encounter rate λ (encounters per year)</b><br>
-          <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year in the surrounding area; P(B) and P(E|B) translate that into the probability of an actual encounter; food and density modifiers tune the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
-          λ = I_y &middot; P(B) &middot; P(E|B) &middot; food &middot; density<br><br>
+          <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year per confident bear in the surrounding area; N_bears is the number of habituated/confident bears in the area; the food-availability modifier tunes the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
+          λ = I_y &middot; N_bears &middot; food<br><br>
 
           <b>2. Element-level encounter rate</b><br>
-          <span class="formula-note">The total encounter rate is split across the three element types according to the attack share s_i, which represents the fraction of bear visits targeting each element type.</span><br>
-          λ_i = λ &middot; s_i<br><br>
+          <span class="formula-note">The total encounter rate is split across the three element types according to the encounter share s_enc_i, which represents the fraction of bear visits targeting each element type.</span><br>
+          λ_i = λ &middot; s_enc_i<br><br>
 
           <b>3. Annual loss without protection</b><br>
           <span class="formula-note">Each encounter targeting element i causes damage with probability P(D_i|B,E), and a damaging event takes u_i units. Expected units damaged per year is therefore P(D_i|B,E) · λ_i · u_i, capped by the available stock N_i — you can't lose more than you have.</span><br>
@@ -743,8 +743,8 @@
           <span class="formula-sub">Losses from non-maintained infrastructure (measure fails) &mdash;</span> appetite share s_prot_i reaches the protected pool but only succeeds with probability P(¬M_j); capped by N_prot.<br>
           residual_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; s_prot_i &middot; P(¬M_j) ,  N_prot ) &middot; c_i<br><br>
 
-          <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional.<br>
-          maint_i/yr = c_maintenance_j &middot; N_i &middot; s_prot_i<br><br>
+          <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional. The per-unit maintenance rate is element-specific.<br>
+          maint_i/yr = c_maintenance_i &middot; N_i &middot; s_prot_i<br><br>
 
           <span class="formula-sub">Installation (per cycle) &mdash;</span> paid upfront when the measure is deployed, and re-paid every lifespan_j years when the measure reaches end-of-life and is replaced.<br>
           install_i = c_install_i &middot; N_i &middot; s_prot_i<br><br>
@@ -767,32 +767,29 @@
 </div>
 
 <script>
-const VARIABLES = [{"name": "Bear presence", "description": "Probability that a bear is present in the area or property within the defined time window (e.g., one year).", "notation": "P(B)", "value": 0.6}, {"name": "Encounter given bear presence", "description": "Probability of an encounter between a bear and a vulnerable element (livestock or agricultural asset), given that a bear is present in the area. Now interpreted as a damage-causing encounter.", "notation": "P(E|B)", "value": 0.85}, {"name": "Average bear incursions per year", "description": "Estimated number of bear incursions per year in the broader area surrounding the property - a baseline pressure metric used to scale the attack rate.", "notation": "I_y", "value": 2200}, {"name": "Food availability modifier", "description": "Multiplicative adjustment on the attack rate based on wild food availability. Low mast/berry years (>1) increase the attack rate; abundant wild food (<1) decreases it.", "notation": "P(D_i|food)", "value": 1}, {"name": "Bear density modifier", "description": "Multiplicative adjustment on the property-level attack rate based on local bear population density.", "notation": "P(D_i|density)", "value": 1}, {"name": "Damage to small livestock", "description": "Probability of damage to small livestock (sheep, goats, poultry) given bear presence and encounter. Combined with the attack share to determine how many events target this element type.", "notation": "P(D_SL|B,E)", "value": 0.85}, {"name": "Damage to large livestock", "description": "Probability of damage to large livestock (cattle, horses) given bear presence and encounter.", "notation": "P(D_LL|B,E)", "value": 0.35}, {"name": "Damage to agriculture", "description": "Probability of damage to agricultural assets (orchards, beehives, crops) given bear presence and encounter.", "notation": "P(D_Ag|B,E)", "value": 0.65}, {"name": "Attack share - small livestock", "description": "Share of all bear attacks at this property that target small livestock. The three element shares must sum to 100%.", "notation": "s_SL", "value": 0.66}, {"name": "Attack share - large livestock", "description": "Share of all bear attacks at this property that target large livestock. The three element shares must sum to 100%.", "notation": "s_LL", "value": 0.1}, {"name": "Attack share - agriculture", "description": "Share of all bear attacks at this property that target agricultural assets. The three element shares must sum to 100%.", "notation": "s_Ag", "value": 0.24}, {"name": "Maintenance of protective measure", "description": "Probability that the protective measure is properly maintained (functional) at the time of an encounter. A maintained measure is assumed to be 100% effective.", "notation": "P(M_j)", "value": 0.85}, {"name": "Failure of protective measure", "description": "Probability that the protective measure fails (1 - P(M_j)). Auto-derived from P(M_j).", "notation": "P(¬M_j)", "value": 0.15}, {"name": "Number of small livestock units", "description": "Total number of small livestock units (head) present and exposed on the property.", "notation": "N_SL", "value": 15000}, {"name": "Number of large livestock units", "description": "Total number of large livestock units (head) present and exposed on the property.", "notation": "N_LL", "value": 2500}, {"name": "Number of agricultural units", "description": "Total number of agricultural units exposed on the property (e.g., beehives, fruit trees).", "notation": "N_Ag", "value": 2000}, {"name": "Units damaged per event - small livestock", "description": "Expected number of small livestock units lost or damaged in a single bear damage event when the bear has access. A behavioral parameter of bear-on-flock attacks; bears typically take 3-5 head per event.", "notation": "u_SL", "value": 10}, {"name": "Units damaged per event - large livestock", "description": "Expected number of large livestock units (typically calves) lost in a single bear damage event when the bear has access. Bears usually take 1 calf per event.", "notation": "u_LL", "value": 2}, {"name": "Units damaged per event - agriculture", "description": "Expected number of agricultural units (e.g., beehives) destroyed in a single bear damage event when the bear has access. Bears tend to destroy multiple beehives per visit.", "notation": "u_Ag", "value": 6}, {"name": "Compensation cost per unit - small livestock", "description": "Compensation paid per small livestock unit lost or damaged.", "notation": "c_SL", "value": 50}, {"name": "Compensation cost per unit - large livestock", "description": "Compensation paid per large livestock unit lost or damaged.", "notation": "c_LL", "value": 800}, {"name": "Compensation cost per unit - agriculture", "description": "Compensation paid per agricultural unit lost or damaged.", "notation": "c_Ag", "value": 600}, {"name": "Share of small livestock protected", "description": "Fraction of small livestock units (0-1) covered by the protective measure (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_SL", "value": 0.6}, {"name": "Share of large livestock protected", "description": "Fraction of large livestock units (0-1) covered by the protective measure.", "notation": "s_prot_LL", "value": 0.25}, {"name": "Share of agriculture protected", "description": "Fraction of agricultural units (0-1) covered by the protective measure (e.g., beehives behind a bear-proof fence).", "notation": "s_prot_Ag", "value": 0.2}, {"name": "Installation cost per unit - small livestock", "description": "One-time installation cost of the protective measure for small livestock, per unit protected (e.g., per sheep place in a guarded enclosure).", "notation": "c_install_SL", "value": 20}, {"name": "Installation cost per unit - large livestock", "description": "One-time installation cost of the protective measure for large livestock, per unit protected.", "notation": "c_install_LL", "value": 80}, {"name": "Installation cost per unit - agriculture", "description": "One-time installation cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).", "notation": "c_install_Ag", "value": 80}, {"name": "Maintenance cost per unit protected", "description": "Recurring annual maintenance cost of the protective measure, per unit protected (averaged across element types).", "notation": "c_maintenance_j", "value": 5}, {"name": "Lifespan of protective measure", "description": "Expected useful lifespan of the protective measure, in years. After this period a re-investment would be needed.", "notation": "lifespan_j", "value": 10}, {"name": "Analysis time horizon", "description": "Number of years over which the cumulative cost-benefit is evaluated. Installation costs are paid in year 0; maintenance and damages accrue each year.", "notation": "T", "value": 12}];
+const VARIABLES = [{"name": "Average bear incursions per year", "description": "Estimated number of bear incursions per year in the broader area surrounding the property - a baseline pressure metric used to scale the attack rate.", "notation": "I_y", "value": 350}, {"name": "Number of confident bears", "description": "Number of bears in the broader area that are habituated/confident enough to approach human settlements and cause damage. Multiplied by I_y to scale the property-level encounter rate.", "notation": "N_bears", "value": 5}, {"name": "Food availability modifier", "description": "Multiplicative adjustment on the attack rate based on wild food availability. Low mast/berry years (>1) increase the attack rate; abundant wild food (<1) decreases it.", "notation": "P(D_i|food)", "value": 1}, {"name": "Damage to small livestock", "description": "Probability of damage to small livestock (sheep, goats, poultry) given bear presence and encounter. Combined with the encounter share to determine how many events target this element type.", "notation": "P(D_SL|B,E)", "value": 0.85}, {"name": "Damage to large livestock", "description": "Probability of damage to large livestock (cattle, horses) given bear presence and encounter.", "notation": "P(D_LL|B,E)", "value": 0.35}, {"name": "Damage to agriculture", "description": "Probability of damage to agricultural assets (orchards, beehives, crops) given bear presence and encounter.", "notation": "P(D_Ag|B,E)", "value": 0.65}, {"name": "Encounter share - small livestock", "description": "Share of all bear encounters at this property that target small livestock. The three element shares must sum to 100%.", "notation": "s_enc_SL", "value": 0.66}, {"name": "Encounter share - large livestock", "description": "Share of all bear encounters at this property that target large livestock. The three element shares must sum to 100%.", "notation": "s_enc_LL", "value": 0.1}, {"name": "Encounter share - agriculture", "description": "Share of all bear encounters at this property that target agricultural assets. The three element shares must sum to 100%.", "notation": "s_enc_Ag", "value": 0.24}, {"name": "Maintenance of protective measure", "description": "Probability that the protective measure is properly maintained (functional) at the time of an encounter. A maintained measure is assumed to be 100% effective.", "notation": "P(M_j)", "value": 0.85}, {"name": "Failure of protective measure", "description": "Probability that the protective measure fails (1 - P(M_j)). Auto-derived from P(M_j).", "notation": "P(¬M_j)", "value": 0.15}, {"name": "Number of small livestock units", "description": "Total number of small livestock units (head) present and exposed on the property.", "notation": "N_SL", "value": 15000}, {"name": "Number of large livestock units", "description": "Total number of large livestock units (head) present and exposed on the property.", "notation": "N_LL", "value": 2500}, {"name": "Number of agricultural units", "description": "Total number of agricultural units exposed on the property (e.g., beehives, fruit trees).", "notation": "N_Ag", "value": 2000}, {"name": "Units damaged per event - small livestock", "description": "Expected number of small livestock units lost or damaged in a single bear damage event when the bear has access. A behavioral parameter of bear-on-flock attacks; bears typically take 3-5 head per event.", "notation": "u_SL", "value": 10}, {"name": "Units damaged per event - large livestock", "description": "Expected number of large livestock units (typically calves) lost in a single bear damage event when the bear has access. Bears usually take 1 calf per event.", "notation": "u_LL", "value": 2}, {"name": "Units damaged per event - agriculture", "description": "Expected number of agricultural units (e.g., beehives) destroyed in a single bear damage event when the bear has access. Bears tend to destroy multiple beehives per visit.", "notation": "u_Ag", "value": 6}, {"name": "Compensation cost per unit - small livestock", "description": "Compensation paid per small livestock unit lost or damaged.", "notation": "c_SL", "value": 50}, {"name": "Compensation cost per unit - large livestock", "description": "Compensation paid per large livestock unit lost or damaged.", "notation": "c_LL", "value": 800}, {"name": "Compensation cost per unit - agriculture", "description": "Compensation paid per agricultural unit lost or damaged.", "notation": "c_Ag", "value": 600}, {"name": "Share of small livestock protected", "description": "Percentage of protected small livestock units (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_SL", "value": 0.6}, {"name": "Share of large livestock protected", "description": "Percentage of protected large livestock units (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_LL", "value": 0.25}, {"name": "Share of agriculture protected", "description": "Percentage of protected agricultrue units (e.g., behind an electric fence or in a guarded pen). The actual protected count is this share times N_SL.", "notation": "s_prot_Ag", "value": 0.2}, {"name": "Installation cost per unit - small livestock", "description": "One-time installation cost of the protective measure for small livestock, per unit protected (e.g., per sheep place in a guarded enclosure).", "notation": "c_install_SL", "value": 20}, {"name": "Installation cost per unit - large livestock", "description": "One-time installation cost of the protective measure for large livestock, per unit protected.", "notation": "c_install_LL", "value": 80}, {"name": "Installation cost per unit - agriculture", "description": "One-time installation cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).", "notation": "c_install_Ag", "value": 80}, {"name": "Maintenance cost per unit protected - small livestock", "description": "Recurring annual maintenance cost of the protective measure for small livestock, per unit protected (e.g., per sheep place).", "notation": "c_maintenance_SL", "value": 5}, {"name": "Maintenance cost per unit protected - large livestock", "description": "Recurring annual maintenance cost of the protective measure for large livestock, per unit protected.", "notation": "c_maintenance_LL", "value": 20}, {"name": "Maintenance cost per unit protected - agriculture", "description": "Recurring annual maintenance cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).", "notation": "c_maintenance_Ag", "value": 5}, {"name": "Lifespan of protective measure", "description": "Expected useful lifespan of the protective measure, in years. After this period a re-investment would be needed.", "notation": "lifespan_j", "value": 10}, {"name": "Analysis time horizon", "description": "Number of years over which the cumulative cost-benefit is evaluated. Installation costs are paid in year 0; maintenance and damages accrue each year.", "notation": "T", "value": 12}];
 const DEFAULTS = JSON.parse(JSON.stringify(VARIABLES));
 
 // === Slider configuration ===
 const SLIDER_CONFIG = {
   // --- General: Bear pressure ---
-  "I_y":           {min:0, max:10000,step:50,   fmt:'int',  section:'general:bear'},
-  "P(B)":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:bear'},
-  "P(E|B)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:bear'},
+  "I_y":           {min:0, max:500,  step:10,   fmt:'int',  section:'general:bear'},
+  "N_bears":       {min:0, max:50,  step:1,    fmt:'int',  section:'general:bear'},
 
   // --- General: Environment modifiers ---
   "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
-  "P(D_i|density)":{min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
 
   // --- General: Protective measure ---
   "P(M_j)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:measure'},
-  "c_maintenance_j":{min:0, max:100, step:1,    fmt:'eur',  section:'general:measure'},
   "lifespan_j":    {min:1, max:30,   step:1,    fmt:'yr',   section:'general:measure'},
 
   // --- General: Time horizon ---
   "T":             {min:1, max:50,   step:1,    fmt:'yr',   section:'general:time'},
 
   // --- General: Distribution of encounters by element type ---
-  "s_SL":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
-  "s_LL":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
-  "s_Ag":          {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:attack-share', share:true},
+  "s_enc_SL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
+  "s_enc_LL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
+  "s_enc_Ag":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
 
   // --- Per-element: Small Livestock ---
   "P(D_SL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
@@ -801,6 +798,7 @@ const SLIDER_CONFIG = {
   "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
   "s_prot_SL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
   "c_install_SL":  {min:0, max:500,  step:5,    fmt:'eur',  section:'SL'},
+  "c_maintenance_SL":{min:0, max:100, step:1,   fmt:'eur',  section:'SL'},
 
   // --- Per-element: Large Livestock ---
   "P(D_LL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
@@ -809,6 +807,7 @@ const SLIDER_CONFIG = {
   "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
   "s_prot_LL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
   "c_install_LL":  {min:0, max:1000, step:10,   fmt:'eur',  section:'LL'},
+  "c_maintenance_LL":{min:0, max:200, step:1,   fmt:'eur',  section:'LL'},
 
   // --- Per-element: Agriculture ---
   "P(D_Ag|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
@@ -817,13 +816,14 @@ const SLIDER_CONFIG = {
   "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
   "s_prot_Ag":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
   "c_install_Ag":  {min:0, max:500,  step:5,    fmt:'eur',  section:'Ag'},
+  "c_maintenance_Ag":{min:0, max:100, step:1,   fmt:'eur',  section:'Ag'},
 };
 
 const GENERAL_SUBSECTIONS = [
   { id: 'time',        label: 'Time horizon' },
   { id: 'bear',        label: 'Bear pressure' },
   { id: 'measure',     label: 'Protective measure' },
-  { id: 'attack-share', label: 'Distribution of encounters by element type' }
+  { id: 'encounter-share', label: 'Distribution of encounters by element type' }
 ];
 
 const ELEMENT_PANELS = [
@@ -861,6 +861,8 @@ function cssVar(name) {
 let state = {};
 VARIABLES.forEach(v => { state[v.notation] = Number(v.value); });
 state['P(¬M_j)'] = 1 - state['P(M_j)'];
+delete state['P(B)'];
+delete state['P(E|B)'];
 
 function getVar(notation) {
   return VARIABLES.find(v => v.notation === notation);
@@ -871,10 +873,10 @@ function renderControl(notation) {
   const cfg = SLIDER_CONFIG[notation];
   const v = getVar(notation);
   if (!v) return '';
-  const isAutoShare = notation === 's_Ag';
-  const disabledAttr = isAutoShare ? ' disabled aria-describedby="auto-share-s_Ag"' : '';
+  const isAutoShare = notation === 's_enc_Ag';
+  const disabledAttr = isAutoShare ? ' disabled aria-describedby="auto-share-s_enc_Ag"' : '';
   const autoNote = isAutoShare
-    ? '<span class="control-note" id="auto-share-s_Ag">Calculated from the other attack shares</span>'
+    ? '<span class="control-note" id="auto-share-s_enc_Ag">Calculated from the other encounter shares</span>'
     : '';
   return `
     <div class="control${isAutoShare ? ' control-auto' : ''}" title="${(v.description || '').replace(/"/g, '&quot;')}">
@@ -895,7 +897,7 @@ lambdaBox.className = 'lambda-display';
 lambdaBox.innerHTML = `
   <div class="lambda-label">
     Expected encounters per year
-    <span class="lambda-formula">lambda = I_y * P(B) * P(E|B) * food * density</span>
+    <span class="lambda-formula">lambda = I_y * N_bears * food</span>
   </div>
   <div class="lambda-value" id="lambda-value">-</div>
 `;
@@ -932,7 +934,7 @@ ELEMENT_PANELS.forEach(ep => {
       <span class="element-panel-tag">${ep.tag}</span>
     </div>
     <div class="element-events" id="events-${ep.key}">
-      <span>Expected events / year</span><strong>—</strong>
+      <span>Expected encounters / year</span><strong>—</strong>
     </div>
     ${items.map(renderControl).join('')}
   `;
@@ -963,9 +965,9 @@ ELEMENT_PANELS.forEach(ep => {
   elementCards.appendChild(card);
 });
 
-// === Attack share sliders ===
-const USER_SHARE_KEYS = ['s_SL', 's_LL'];
-const AUTO_SHARE_KEY = 's_Ag';
+// === Encounter share sliders ===
+const USER_SHARE_KEYS = ['s_enc_SL', 's_enc_LL'];
+const AUTO_SHARE_KEY = 's_enc_Ag';
 
 function setSliderValue(key) {
   const inp = document.querySelector(`input[data-key="${key}"]`);
@@ -974,27 +976,27 @@ function setSliderValue(key) {
   if (valEl) valEl.textContent = fmt[SLIDER_CONFIG[key].fmt](state[key]);
 }
 
-function updateAttackShares(changedKey) {
+function updateEncounterShares(changedKey) {
   if (!USER_SHARE_KEYS.includes(changedKey)) return;
   const otherKey = USER_SHARE_KEYS.find(k => k !== changedKey);
   const maxForChanged = Math.max(0, 1 - state[otherKey]);
 
   state[changedKey] = Math.min(Math.max(0, state[changedKey]), maxForChanged);
-  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_SL'] - state['s_LL']);
+  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_enc_SL'] - state['s_enc_LL']);
 
   setSliderValue(changedKey);
   setSliderValue(AUTO_SHARE_KEY);
 }
 
-function resetAttackSharesFromDefaults() {
+function resetEncounterSharesFromDefaults() {
   const userSum = USER_SHARE_KEYS.reduce((sum, key) => sum + state[key], 0);
   if (userSum > 1) {
     USER_SHARE_KEYS.forEach(key => { state[key] = state[key] / userSum; });
   }
-  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_SL'] - state['s_LL']);
+  state[AUTO_SHARE_KEY] = Math.max(0, 1 - state['s_enc_SL'] - state['s_enc_LL']);
 }
 
-resetAttackSharesFromDefaults();
+resetEncounterSharesFromDefaults();
 [...USER_SHARE_KEYS, AUTO_SHARE_KEY].forEach(setSliderValue);
 
 // === Wire up sliders ===
@@ -1003,7 +1005,7 @@ document.querySelectorAll('input[type=range]').forEach(inp => {
     const key = e.target.dataset.key;
     state[key] = Number(e.target.value);
     if (key === 'P(M_j)') state['P(¬M_j)'] = 1 - state[key];
-    if (USER_SHARE_KEYS.includes(key)) updateAttackShares(key);
+    if (USER_SHARE_KEYS.includes(key)) updateEncounterShares(key);
     setSliderValue(key);
     recompute();
   });
@@ -1012,7 +1014,7 @@ document.querySelectorAll('input[type=range]').forEach(inp => {
 document.getElementById('reset-all').addEventListener('click', () => {
   DEFAULTS.forEach(v => { state[v.notation] = Number(v.value); });
   state['P(¬M_j)'] = 1 - state['P(M_j)'];
-  resetAttackSharesFromDefaults();
+  resetEncounterSharesFromDefaults();
   document.querySelectorAll('input[type=range]').forEach(inp => {
     const k = inp.dataset.key;
     setSliderValue(k);
@@ -1024,12 +1026,12 @@ document.getElementById('reset-all').addEventListener('click', () => {
 // Element-level damage probability P(D_i|B,E) is applied downstream per element.
 function computeLambda() {
   const s = state;
-  return s['I_y'] * s['P(B)'] * s['P(E|B)'] * s['P(D_i|food)'] * s['P(D_i|density)'];
+  return s['I_y'] * s['N_bears'] * s['P(D_i|food)'];
 }
 
 function modelFor(elementKey, lambda) {
   const s = state;
-  const lambda_i = lambda * s['s_' + elementKey];
+  const lambda_i = lambda * s['s_enc_' + elementKey];
   const N = s['N_' + elementKey];
   const u = s['u_' + elementKey];
   const c = s['c_' + elementKey];
@@ -1052,7 +1054,7 @@ function modelFor(elementKey, lambda) {
     const residualUnits = Math.min(expectedUnits * share * s['P(¬M_j)'],       Nprot);
     const unprotPerYr   = unprotUnits   * c;
     const residualPerYr = residualUnits * c;
-    const maintPerYr    = s['c_maintenance_j'] * Nprot;
+    const maintPerYr    = s['c_maintenance_' + elementKey] * Nprot;
     const installYr0    = cInst * Nprot;
     return {
       Nprot, Nunprot,
@@ -1265,7 +1267,7 @@ function recompute() {
   // Update per-element event count display
   elements.forEach(({key, m}) => {
     document.getElementById('events-' + key).innerHTML =
-      `<span>Expected events / year</span><strong>${m.lambda_i.toFixed(2)}</strong>`;
+      `<span>Expected encounters / year</span><strong>${m.lambda_i.toFixed(2)}</strong>`;
   });
 
   // Per-element tables and charts
@@ -1279,7 +1281,7 @@ function recompute() {
     const tbody = document.getElementById('el-metrics-' + key);
     tbody.innerHTML = `
       <tr>
-        <td class="label">Expected events / year</td>
+        <td class="label">Expected encounters / year</td>
         <td class="value">${m.lambda_i.toFixed(2)}</td>
       </tr>
       <tr>

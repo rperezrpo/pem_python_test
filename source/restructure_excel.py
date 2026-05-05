@@ -16,25 +16,22 @@ PATH = Path("/mnt/user-data/outputs/bear_attack_model_variables.xlsx")
 
 # Build the new variable list from scratch (cleanest approach)
 ROWS = [
-    # ---------- Base probabilities ----------
-    ("Bear presence",
-     "Probability that a bear is present in the area or property within the defined time window (e.g., one year).",
-     "P(B)", 0.60),
-    ("Encounter given bear presence",
-     "Probability of an encounter between a bear and a vulnerable element (livestock or agricultural asset), given that a bear is present in the area. Now interpreted as a damage-causing encounter.",
-     "P(E|B)", 0.40),
+    # ---------- Bear pressure ----------
+    ("Average bear incursions per year",
+     "Estimated number of bear incursions per year per confident bear in the broader area surrounding the property - a baseline pressure metric used to scale the attack rate.",
+     "I_y", 2200),
+    ("Number of confident bears",
+     "Number of bears in the broader area that are habituated/confident enough to approach human settlements and cause damage. Multiplied by I_y to scale the property-level encounter rate.",
+     "N_bears", 5),
 
     # ---------- Environment modifiers (now feed into λ, not per-element formulas) ----------
     ("Food availability modifier",
      "Multiplicative adjustment on the property-level attack rate based on wild food availability. Low mast/berry years (>1) increase the attack rate; abundant wild food (<1) decreases it.",
      "P(D_i|food)", 1.20),
-    ("Bear density modifier",
-     "Multiplicative adjustment on the property-level attack rate based on local bear population density.",
-     "P(D_i|density)", 1.00),
 
-    # ---------- Per-element damage probabilities (still used to combine with attack share) ----------
+    # ---------- Per-element damage probabilities (still used to combine with encounter share) ----------
     ("Damage to small livestock",
-     "Probability of damage to small livestock (sheep, goats, poultry) given bear presence and encounter. Combined with the attack share to determine how many events target this element type.",
+     "Probability of damage to small livestock (sheep, goats, poultry) given bear presence and encounter. Combined with the encounter share to determine how many events target this element type.",
      "P(D_SL|B,E)", 0.35),
     ("Damage to large livestock",
      "Probability of damage to large livestock (cattle, horses) given bear presence and encounter.",
@@ -43,16 +40,16 @@ ROWS = [
      "Probability of damage to agricultural assets (orchards, beehives, crops) given bear presence and encounter.",
      "P(D_Ag|B,E)", 0.45),
 
-    # ---------- Attack share per element (NEW: must sum to 100%) ----------
-    ("Attack share - small livestock",
-     "Share of all bear attacks at this property that target small livestock. The three element shares must sum to 100%.",
-     "s_SL", 0.40),
-    ("Attack share - large livestock",
-     "Share of all bear attacks at this property that target large livestock.",
-     "s_LL", 0.10),
-    ("Attack share - agriculture",
-     "Share of all bear attacks at this property that target agricultural assets.",
-     "s_Ag", 0.50),
+    # ---------- Encounter share per element (NEW: must sum to 100%) ----------
+    ("Encounter share - small livestock",
+     "Share of all bear encounters at this property that target small livestock. The three element shares must sum to 100%.",
+     "s_enc_SL", 0.40),
+    ("Encounter share - large livestock",
+     "Share of all bear encounters at this property that target large livestock.",
+     "s_enc_LL", 0.10),
+    ("Encounter share - agriculture",
+     "Share of all bear encounters at this property that target agricultural assets.",
+     "s_enc_Ag", 0.50),
 
     # ---------- Maintenance probability ----------
     ("Maintenance of protective measure",
@@ -117,10 +114,18 @@ ROWS = [
      "One-time installation cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).",
      "c_install_Ag", 80),
 
+    # ---------- Per-element: maintenance cost (NEW: was global) ----------
+    ("Maintenance cost per unit protected - small livestock",
+     "Recurring annual maintenance cost of the protective measure for small livestock, per unit protected (e.g., per sheep place).",
+     "c_maintenance_SL", 5),
+    ("Maintenance cost per unit protected - large livestock",
+     "Recurring annual maintenance cost of the protective measure for large livestock, per unit protected.",
+     "c_maintenance_LL", 20),
+    ("Maintenance cost per unit protected - agriculture",
+     "Recurring annual maintenance cost of the protective measure for agriculture, per unit protected (e.g., per beehive on a fenced platform).",
+     "c_maintenance_Ag", 5),
+
     # ---------- Global protective-measure parameters ----------
-    ("Maintenance cost per unit protected",
-     "Recurring annual maintenance cost of the protective measure, per unit protected (averaged across element types).",
-     "c_maintenance_j", 12),
     ("Lifespan of protective measure",
      "Expected useful lifespan of the protective measure, in years. After this period a re-investment would be needed.",
      "lifespan_j", 10),

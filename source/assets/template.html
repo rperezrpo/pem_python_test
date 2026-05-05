@@ -76,12 +76,12 @@ __STYLES__
         <summary>Show formulas used</summary>
         <div class="formula">
           <b>1. Encounter rate λ (encounters per year)</b><br>
-          <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year in the surrounding area; P(B) and P(E|B) translate that into the probability of an actual encounter; food and density modifiers tune the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
-          λ = I_y &middot; P(B) &middot; P(E|B) &middot; food &middot; density<br><br>
+          <span class="formula-note">Rate of bear encounters per year on this property. I_y is the estimated number of bear incursions per year per confident bear in the surrounding area; N_bears is the number of habituated/confident bears in the area; the food-availability modifier tunes the rate. Damage probabilities P(D_i|B,E) are no longer averaged into λ — they are applied per element in step 3.</span><br>
+          λ = I_y &middot; N_bears &middot; food<br><br>
 
           <b>2. Element-level encounter rate</b><br>
-          <span class="formula-note">The total encounter rate is split across the three element types according to the attack share s_i, which represents the fraction of bear visits targeting each element type.</span><br>
-          λ_i = λ &middot; s_i<br><br>
+          <span class="formula-note">The total encounter rate is split across the three element types according to the encounter share s_enc_i, which represents the fraction of bear visits targeting each element type.</span><br>
+          λ_i = λ &middot; s_enc_i<br><br>
 
           <b>3. Annual loss without protection</b><br>
           <span class="formula-note">Each encounter targeting element i causes damage with probability P(D_i|B,E), and a damaging event takes u_i units. Expected units damaged per year is therefore P(D_i|B,E) · λ_i · u_i, capped by the available stock N_i — you can't lose more than you have.</span><br>
@@ -96,8 +96,8 @@ __STYLES__
           <span class="formula-sub">Losses from non-maintained infrastructure (measure fails) &mdash;</span> appetite share s_prot_i reaches the protected pool but only succeeds with probability P(¬M_j); capped by N_prot.<br>
           residual_i = min( P(D_i|B,E) &middot; λ_i &middot; u_i &middot; s_prot_i &middot; P(¬M_j) ,  N_prot ) &middot; c_i<br><br>
 
-          <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional.<br>
-          maint_i/yr = c_maintenance_j &middot; N_i &middot; s_prot_i<br><br>
+          <span class="formula-sub">Maintenance per year &mdash;</span> recurring annual cost of keeping each protected unit functional. The per-unit maintenance rate is element-specific.<br>
+          maint_i/yr = c_maintenance_i &middot; N_i &middot; s_prot_i<br><br>
 
           <span class="formula-sub">Installation (per cycle) &mdash;</span> paid upfront when the measure is deployed, and re-paid every lifespan_j years when the measure reaches end-of-life and is replaced.<br>
           install_i = c_install_i &middot; N_i &middot; s_prot_i<br><br>

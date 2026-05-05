@@ -144,28 +144,25 @@ ASSETS_NOTE = (
 FORMULAS = [
     (
         "1. Property-level attack rate λ (events per year)",
-        "λ = P(B) · P(E|B) · P(D_i|food) · P(D_i|density) · Σ [ s_i · P(D_i | B, E) ]",
-        "This expression collapses the original probability chain into a single "
-        "rate of damage events per year on the property. P(B) gives the chance a "
-        "bear is in the area at all; P(E|B) the chance such a bear actually "
-        "encounters an asset in a way that could cause damage. The two "
-        "environment factors — wild-food availability and bear-population "
-        "density — multiplicatively scale that base rate up or down (values "
-        "above 1 worsen pressure, below 1 ease it). The final sum averages the "
-        "element-specific damage probabilities, weighted by how often each asset "
-        "type is the target (the attack shares s_i). The result λ is the "
-        "expected number of damage events on the property in one year, before "
-        "splitting them between asset types."
+        "λ = I_y · N_bears · P(D_i|food)",
+        "The encounter rate is now anchored on counts rather than probabilities. "
+        "I_y is the baseline incursion rate per confident bear in the surrounding "
+        "area, and N_bears is the number of habituated/confident bears expected "
+        "to approach human settlements; their product is the property-level "
+        "encounter pressure. The wild-food availability modifier multiplicatively "
+        "scales that base rate up or down (values above 1 worsen pressure, below "
+        "1 ease it). The result λ is the expected number of encounters on the "
+        "property in one year, before splitting them between asset types."
     ),
     (
         "2. Element-level event rate",
-        "λ_i = λ · s_i",
+        "λ_i = λ · s_enc_i",
         "Once the property-level rate λ is known, it is divided among the three "
-        "asset types according to their attack shares. s_SL + s_LL + s_Ag = 1 by "
-        "construction (the front-end auto-normalises the shares whenever the "
-        "user moves one slider), so this step simply allocates the total annual "
-        "events without inventing or losing any. λ_i is what feeds every "
-        "downstream cost calculation for asset type i."
+        "asset types according to their encounter shares. s_enc_SL + s_enc_LL + "
+        "s_enc_Ag = 1 by construction (the front-end auto-normalises the shares "
+        "whenever the user moves one slider), so this step simply allocates the "
+        "total annual events without inventing or losing any. λ_i is what feeds "
+        "every downstream cost calculation for asset type i."
     ),
     (
         "3. Annual loss without protection",
@@ -203,13 +200,13 @@ FORMULAS = [
     ),
     (
         "4c. Annual cost with protection — maintenance",
-        "maint_i / yr = c_maintenance_j · N_i · s_prot_i",
+        "maint_i / yr = c_maintenance_i · N_i · s_prot_i",
         "Keeping the measure functional has a recurring annual cost: replacing "
         "fence batteries, feeding guardian dogs, repainting beehive platforms. "
         "It scales linearly with the number of units actually under "
-        "protection (N_i · s_prot_i), and uses a single per-unit maintenance "
-        "rate c_maintenance_j that the user calibrates once for the chosen "
-        "measure."
+        "protection (N_i · s_prot_i), and uses an element-specific per-unit "
+        "maintenance rate c_maintenance_i because the cost of maintaining a "
+        "fence around sheep, around cattle, and around beehives differs."
     ),
     (
         "4d. Annual cost with protection — installation (year 0 only)",
@@ -250,7 +247,7 @@ FORMULAS = [
 
 CLOSING = (
     "Two implementation notes worth keeping in mind. First, the share sliders "
-    "s_SL, s_LL, s_Ag are auto-normalised in the browser so that they always "
+    "s_enc_SL, s_enc_LL, s_enc_Ag are auto-normalised in the browser so that they always "
     "sum to one — moving one redistributes the remainder across the others "
     "proportionally. Second, the failure probability P(¬M_j) is not an "
     "independent parameter: it is recomputed from P(M_j) every time the user "
