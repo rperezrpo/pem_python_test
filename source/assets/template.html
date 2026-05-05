@@ -30,8 +30,9 @@ __STYLES__
     <span class="eyebrow site-brand">Ursus &middot; Cost-Benefit Model</span>
     <nav class="tabs" role="tablist">
       <button type="button" data-page="table">Data Source</button>
-      <button type="button" data-page="simple">Simple Model</button>
-      <button type="button" data-page="complete">Complete Model</button>
+      <button type="button" data-page="simple">Simple View</button>
+      <button type="button" data-page="complete">Complete View</button>
+      <button type="button" data-page="scenarios">Scenarios</button>
     </nav>
     <div class="header-controls">
       <button class="guide-btn active" id="guide-btn" type="button" data-page="guide">Guide</button>
@@ -219,6 +220,34 @@ __STYLES__
   </section>
 
   <!-- Page: Guide -->
+  <!-- Page: Scenarios -->
+  <section class="page" id="page-scenarios">
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">Scenario presets</h2>
+        <span class="card-sub">Click a level to randomly assign values within that range</span>
+      </div>
+      <div class="scenario-rows" id="scenario-rows"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">Scenario summary</h2>
+        <span class="card-sub" id="scenario-card-sub">Per-year &middot; EUR</span>
+      </div>
+      <div class="element-results-grid">
+        <div>
+          <table class="metric-table">
+            <tbody id="scenario-metrics"></tbody>
+          </table>
+        </div>
+        <div class="chart-box">
+          <canvas id="scenarioChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="page active" id="page-guide">
     <div class="guide-grid">
 
@@ -231,10 +260,10 @@ __STYLES__
           <p>The tool always compares two different scenarios: <strong>no protective measures implemented</strong> 
             and <strong>protective measures are implemented</strong>. Both scenarios assume the compensation policy currently in place, in which residents and farmers can claim monetary
             compensation if they have suffered property loss or damage due to a bear.
-          <p><strong>No protection</strong> — the owner is payed compensation every time a damage event occurs.</p>
-          <p><strong>With protection</strong> — funds are used to install protective measures or bear proof infrastructure (electric fences, bear-proof barns, etc) covering a chosen share of each asset type. There is an upfront installation cost and a recurring annual maintenance cost.</p>
+          <p>In the <strong>no protection scenario</strong> all the costs go to compensation payed to the owner for all damage ocurred, without any protective infrastructe.</p>
+          <p>In the <strong>protection implemented scenario</strong> funds are used to install and maintain protective measures or bear proof infrastructure (electric fences, bear-proof barns, etc) covering a chosen share of each asset type. Even with measures, some damage still occurs, so compensation is also calculated.</p>
           <p>The model tracks three asset types — small livestock (sheep, goats, poultry), large livestock (cattle, horses), and agriculture (beehives, orchards). Each of them has differentiated characteristics (costs, rates of encounter, probability of damage, etc.). The key output is the cumulative cost curve for both strategies.</p>
-          <p>Bear encounter pressure is driven by the number of bears habituated to human infrastructure ("confident bears") in the and a baseline incursion rate.</p>
+          <p>Bear encounter pressure is driven by the number of bears habituated to human infrastructure ("confident bears") and a baseline incursion rate, defined based on historical data.</p>
         </div>
       </div>
 
@@ -249,14 +278,17 @@ __STYLES__
               In that sense, it is more complex to use but also offers more precise scenarios.</p>
             <p>The simple view has a reduced number of sliders, showing most relevant variables and reducing the complexity of the tool. This version is intended for easy scenario making and for engaging with non-expert stakeholders</p>
           <p>All views are connected, and the model behind each is shared. A change made on the Simple View page is immediately reflected on the Complete View page and in the Data Source table, and vice versa.</p>
+          <p>The <strong>Generate Scenarios</strong> page has a set of predefined analytical scenarios that you can use to understand how different variables affect the cost-benefit ratio of the measures.
+            You can use either the simple or complete view pages to play with the variables and define your own scenarios.</p>
+          </div>      
         <div class="card-head">
           <h2 class="card-title">Understanding the sections</h2>
         </div>
         <div class="card-body">
           <p><strong>General context panel</strong>: Here you can set the time horizon, bear pressure, protective measure effectiveness and lifespan. These apply to all asset types.</p>
-          <p><strong>Per-asset panels</strong>: tune parameters for each asset type individually. This includes total amount of units, what share is protected and compensation, installation and maintenance costs of the measure.</p>
-          <p><strong>Result cards</strong>: each asset type shows an annual cost breakdown and a cumulative cost chart. The overall chart aggregates all three types and displays the net benefit of protection at the chosen horizon.</p>
-          <p><strong>Reset button</strong>: restores all sliders to the default values.</p>
+          <p><strong>Per-asset panels</strong>: Use it to tune parameters for each asset type individually. This includes total amount of units, what share is protected and compensation, installation and maintenance costs of the measure.</p>
+          <p><strong>Result cards</strong>: Define each asset type shows an annual cost breakdown and a cumulative cost chart. The overall chart aggregates all three types and displays the net benefit of protection at the chosen horizon.</p>
+          <p><strong>Reset button</strong>: Restore all sliders to the default values.</p>
           <p>The verdict in the page header updates in real time and summarises whether protection or compensation is the better strategy at the chosen time horizon.</p>
         </div>
       </div>
@@ -275,8 +307,13 @@ __STYLES__
   </section>
 
   <div class="footer">
-    Generated from bear_attack_model_variables.xlsx &middot; Adjust sliders to model your scenario &middot; All values in EUR
-  </div>
+    <div class="footer-main">
+      <p>Developed as part of the <em>Participatory Environmental Modelling</em> course at ETH Z&uuml;rich.</p>
+      <p>Credits: Ricardo P&eacute;rez-Restrepo, Anna Minor, Peppino M&uuml;ller and Alessandra Ciampi</p>
+      <p>We&rsquo;d like to thank <strong>Salviamo l&rsquo;Orso</strong>, and particularly Paula Meyer and Berenice Guinel, for their help and inputs in developing this tool.</p>
+      <p>Contact: <a href="mailto:perez-restrepo@ibi.baug.ethz.ch">perez-restrepo@ibi.baug.ethz.ch</a> &middot; 05.2026</p>
+    </div>
+      </div>
 </div>
 
 <script>

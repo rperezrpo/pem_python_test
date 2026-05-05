@@ -189,6 +189,8 @@ resetEncounterSharesFromDefaults();
 function recomputeAll() {
   modelInstances.forEach(i => i.recompute());
   updateVariablesTableValues();
+  updateScenarioButtonStates();
+  recomputeScenarioCard();
 }
 
 function resetAll() {
@@ -197,6 +199,386 @@ function resetAll() {
   resetEncounterSharesFromDefaults();
   Object.keys(SLIDER_CONFIG).forEach(setSliderValueAll);
   recomputeAll();
+}
+
+// === Scenarios ===
+// Each row defines (1) the variables it controls and (2) three relative ranges
+// (low/middle/high) expressed as fractions of each variable's slider min/max.
+// Clicking a level picks a random value inside that fraction window for every
+// variable in the row, writes to shared state, and rebroadcasts to all sliders.
+const SCENARIO_ROWS = [
+  {
+    id: 'bear-encounters',
+    label: 'Bear Encounters',
+    keys: ['I_y', 'N_bears'],
+  },
+  {
+    id: 'measure-cost',
+    label: 'Measure Cost',
+    keys: ['c_install_SL', 'c_install_LL', 'c_install_Ag',
+           'c_maintenance_SL', 'c_maintenance_LL', 'c_maintenance_Ag'],
+  },
+  {
+    id: 'compensation-cost',
+    label: 'Compensation Cost',
+    keys: ['c_SL', 'c_LL', 'c_Ag'],
+  },
+  {
+    id: 'random-scenario',
+    label: 'Random Scenario',
+    // null keys means "apply random level to all of the rows above"
+    keys: null,
+  }
+];
+
+// Range bands expressed as fractions of the slider's [min, max] window.
+const SCENARIO_LEVELS = {
+  low:    { range: [0.05, 0.30] },
+  middle: { range: [0.35, 0.65] },
+  high:   { range: [0.70, 0.95] },
+};
+
+function snapToStep(value, cfg) {
+  const stepped = Math.round((value - cfg.min) / cfg.step) * cfg.step + cfg.min;
+  return Math.max(cfg.min, Math.min(cfg.max, stepped));
+}
+
+function pickInBand(key, level) {
+  const cfg = SLIDER_CONFIG[key];
+  if (!cfg) return null;
+  const [lo, hi] = SCENARIO_LEVELS[level].range;
+  const span = cfg.max - cfg.min;
+  const raw = cfg.min + (lo + Math.random() * (hi - lo)) * span;
+  return snapToStep(raw, cfg);
+}
+
+function applyScenario(rowId, level) {
+  if (rowId === 'random-scenario') {
+    // Push every non-random row at a random level (could differ per row)
+    SCENARIO_ROWS.forEach(row => {
+      if (row.id === 'random-scenario') return;
+      const levels = ['low', 'middle', 'high'];
+      const randomLevel = levels[Math.floor(Math.random() * levels.length)];
+      applyKeysAtLevel(row.keys, randomLevel);
+    });
+  } else {
+    const row = SCENARIO_ROWS.find(r => r.id === rowId);
+    if (!row || !row.keys) return;
+    applyKeysAtLevel(row.keys, level);
+  }
+  recomputeAll();
+}
+
+function applyKeysAtLevel(keys, level) {
+  keys.forEach(key => {
+    const value = pickInBand(key, level);
+    if (value === null) return;
+    state[key] = value;
+    if (key === 'P(M_j)') state['P(¬M_j)'] = 1 - value;
+    setSliderValueAll(key);
+  });
+}
+
+// Per-element summary chart (lines per element + light-gray net benefit fill)
+let scenarioChart = null;
+
+function mountScenarioCard() {
+  const canvas = document.getElementById('scenarioChart');
+  if (!canvas) return;
+  scenarioChart = new Chart(canvas, {
+    type: 'line',
+    data: { labels: [], datasets: [] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: lineLegendLabels },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtMoney(ctx.raw) } }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => fmtMoney(v) }, grid: { color: cssVar('--line') } },
+        x: { grid: { display: false }, title: { display: true, text: 'Year', color: cssVar('--ink-dim') } }
+      },
+      elements: { point: { radius: 2, hoverRadius: 5 }, line: { borderWidth: 2, tension: 0 } }
+    }
+  });
+}
+
+function recomputeScenarioCard() {
+  const tbody = document.getElementById('scenario-metrics');
+  if (!tbody || !scenarioChart) return;
+
+  const lambda = computeLambda();
+  const T = Math.round(state['T']);
+  const labels = Array.from({length: T + 1}, (_, t) => t);
+
+  const elements = ELEMENT_PANELS.map(ep => ({
+    ...ep,
+    m: modelFor(ep.key, lambda),
+    color: elementColor(ep.key),
+    ts: null
+  }));
+  elements.forEach(e => { e.ts = timeSeries(e.m, T); });
+
+  // Aggregate cumulative no-prot, with-prot, and running net across all elements.
+  const cumNoProtSeries = labels.map((_, t) => 0);
+  const cumProtSeries   = labels.map((_, t) => 0);
+  const cumNetSeries    = labels.map((_, t) => 0);
+  let runNoProt = 0, runProt = 0;
+  for (let t = 0; t <= T; t++) {
+    let nYear = 0, pYear = 0;
+    elements.forEach(({ts}) => { nYear += ts.noProt[t]; pYear += ts.prot[t]; });
+    runNoProt += nYear;
+    runProt += pYear;
+    cumNoProtSeries[t] = runNoProt;
+    cumProtSeries[t] = runProt;
+    cumNetSeries[t] = runNoProt - runProt;
+  }
+
+  // Aggregated table rows (sum across elements at horizon T)
+  const sumLambda = elements.reduce((a, e) => a + e.m.lambda_i, 0);
+  const sumNoProtPerYr = elements.reduce((a, e) => a + e.m.noProtPerYr, 0);
+  const sumProtPerYr = elements.reduce((a, e) => a + e.m.protPerYr, 0);
+  const sumUnprotPerYr = elements.reduce((a, e) => a + e.m.unprotPerYr, 0);
+  const sumResidualPerYr = elements.reduce((a, e) => a + e.m.residualPerYr, 0);
+  const sumMaintPerYr = elements.reduce((a, e) => a + e.m.maintPerYr, 0);
+  const sumInstallCycle = elements.reduce((a, e) => a + e.m.installYr0, 0);
+  const cumNoProt = cumNoProtSeries[T];
+  const cumProt = cumProtSeries[T];
+  const benefit = cumNoProt - cumProt;
+  const better = benefit > 0;
+
+  tbody.innerHTML = `
+    <tr>
+      <td class="label">Expected encounters / year</td>
+      <td class="value">${sumLambda.toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td class="label">Annual loss without protection</td>
+      <td class="value loss">${fmtMoney(sumNoProtPerYr)} / yr</td>
+    </tr>
+    <tr>
+      <td class="label">Annual cost with protection</td>
+      <td class="value">${fmtMoney(sumProtPerYr)} / yr</td>
+    </tr>
+    <tr>
+      <td class="label indent">— Losses from unprotected units</td>
+      <td class="value">${fmtMoney(sumUnprotPerYr)} / yr</td>
+    </tr>
+    <tr>
+      <td class="label indent">— Losses from non-maintained infrastructure</td>
+      <td class="value">${fmtMoney(sumResidualPerYr)} / yr</td>
+    </tr>
+    <tr>
+      <td class="label indent">— Maintenance</td>
+      <td class="value">${fmtMoney(sumMaintPerYr)} / yr</td>
+    </tr>
+    <tr>
+      <td class="label">Installation (per cycle)</td>
+      <td class="value">${fmtMoney(sumInstallCycle)}</td>
+    </tr>
+    <tr>
+      <td class="label">Cumulative — no protection</td>
+      <td class="value loss">${fmtMoney(cumNoProt)}</td>
+    </tr>
+    <tr>
+      <td class="label">Cumulative — with protection</td>
+      <td class="value">${fmtMoney(cumProt)}</td>
+    </tr>
+    <tr>
+      <td class="label">Net benefit at year ${T}</td>
+      <td class="value ${better?'savings':'loss'}">${(better?'+':'')+fmtMoney(benefit)}</td>
+    </tr>
+    <tr>
+      <td class="label">Recommendation</td>
+      <td class="value"><span class="verdict-pill ${better?'protect':'compensate'}">${better?'Protect':'Compensate'}</span></td>
+    </tr>
+  `;
+  const subEl = document.getElementById('scenario-card-sub');
+  if (subEl) subEl.textContent = `Cumulative · ${T}-year horizon`;
+
+  // Chart datasets: per-element no-prot (dashed) + with-prot (solid), in element colour;
+  // plus a light-gray net benefit line with fill.
+  const datasets = [];
+  elements.forEach(({name, color, ts}) => {
+    const cumNoProt = [];
+    const cumProt = [];
+    let rn = 0, rp = 0;
+    for (let t = 0; t <= T; t++) {
+      rn += ts.noProt[t]; rp += ts.prot[t];
+      cumNoProt.push(rn); cumProt.push(rp);
+    }
+    datasets.push({
+      label: `${name} — no protection`,
+      data: cumNoProt,
+      borderColor: color,
+      backgroundColor: color + '14',
+      borderDash: [5, 3],
+      fill: false
+    });
+    datasets.push({
+      label: `${name} — with protection`,
+      data: cumProt,
+      borderColor: color,
+      backgroundColor: color + '14',
+      fill: false
+    });
+  });
+  const grayColor = cssVar('--ink-dim');
+  datasets.push({
+    label: 'Net benefit (no-prot − prot)',
+    data: cumNetSeries,
+    borderColor: grayColor,
+    backgroundColor: grayColor + '26',
+    fill: 'origin',
+    borderWidth: 1.5,
+    borderDash: [2, 3]
+  });
+
+  scenarioChart.data.labels = labels;
+  scenarioChart.data.datasets = datasets;
+  scenarioChart.update();
+}
+
+function buildScenariosPage() {
+  const root = document.getElementById('scenario-rows');
+  if (!root) return;
+  root.innerHTML = '';
+  SCENARIO_ROWS.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'scenario-row';
+    if (row.id === 'random-scenario') {
+      rowEl.classList.add('scenario-row-random');
+      rowEl.innerHTML = `
+        <div class="scenario-row-label">${row.label}</div>
+        <div class="scenario-row-buttons">
+          <button type="button" class="scenario-btn generate" data-row="${row.id}" data-level="random">Generate</button>
+        </div>
+      `;
+    } else {
+      rowEl.innerHTML = `
+        <div class="scenario-row-label">${row.label}</div>
+        <div class="scenario-row-buttons">
+          <button type="button" class="scenario-btn high"   data-row="${row.id}" data-level="high">High</button>
+          <button type="button" class="scenario-btn middle" data-row="${row.id}" data-level="middle">Middle</button>
+          <button type="button" class="scenario-btn low"    data-row="${row.id}" data-level="low">Low</button>
+        </div>
+      `;
+    }
+    root.appendChild(rowEl);
+  });
+  root.querySelectorAll('.scenario-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyScenario(btn.dataset.row, btn.dataset.level);
+    });
+  });
+  updateScenarioButtonStates();
+}
+
+function valueIsInBand(key, level) {
+  const cfg = SLIDER_CONFIG[key];
+  if (!cfg) return false;
+  const [lo, hi] = SCENARIO_LEVELS[level].range;
+  const span = cfg.max - cfg.min;
+  if (span <= 0) return false;
+  const fraction = (state[key] - cfg.min) / span;
+  return fraction >= lo && fraction <= hi;
+}
+
+function activeLevelForRow(row) {
+  if (!row.keys || row.keys.length === 0) return null;
+  for (const level of ['low', 'middle', 'high']) {
+    if (row.keys.every(key => valueIsInBand(key, level))) return level;
+  }
+  return null;
+}
+
+function updateScenarioButtonStates() {
+  const root = document.getElementById('scenario-rows');
+  if (!root) return;
+  SCENARIO_ROWS.forEach(row => {
+    if (row.id === 'random-scenario') return;
+    const activeLevel = activeLevelForRow(row);
+    ['low', 'middle', 'high'].forEach(level => {
+      const btn = root.querySelector(`.scenario-btn[data-row="${row.id}"][data-level="${level}"]`);
+      if (btn) btn.classList.toggle('active', level === activeLevel);
+    });
+  });
+}
+
+// === Model math (pure — reads only from shared `state`) ===
+function computeLambda() {
+  const s = state;
+  return s['I_y'] * s['N_bears'] * s['P(D_i|food)'];
+}
+
+function modelFor(elementKey, lambda) {
+  const s = state;
+  const lambda_i = lambda * s['s_enc_' + elementKey];
+  const N = s['N_' + elementKey];
+  const u = s['u_' + elementKey];
+  const c = s['c_' + elementKey];
+  const pD = s['P(D_' + elementKey + '|B,E)'];
+  const protShare = Math.max(0, Math.min(1, s['s_prot_' + elementKey]));
+  const cInst = s['c_install_' + elementKey];
+  const expectedUnits = pD * lambda_i * u;
+
+  function scenarioAt(share) {
+    const Nprot   = Math.min(Math.round(share * N), N);
+    const Nunprot = Math.max(0, N - Nprot);
+    const unprotUnits   = Math.min(expectedUnits * (1 - share),                Nunprot);
+    const residualUnits = Math.min(expectedUnits * share * s['P(¬M_j)'],       Nprot);
+    const unprotPerYr   = unprotUnits   * c;
+    const residualPerYr = residualUnits * c;
+    const maintPerYr    = s['c_maintenance_' + elementKey] * Nprot;
+    const installYr0    = cInst * Nprot;
+    return {
+      Nprot, Nunprot,
+      unprotPerYr, residualPerYr, maintPerYr, installYr0,
+      annualPerYr: unprotPerYr + residualPerYr + maintPerYr,
+    };
+  }
+
+  const noProt = scenarioAt(0);
+  const prot   = scenarioAt(protShare);
+
+  return {
+    lambda_i,
+    noProtPerYr:   noProt.annualPerYr,
+    unprotPerYr:   prot.unprotPerYr,
+    residualPerYr: prot.residualPerYr,
+    maintPerYr:    prot.maintPerYr,
+    installYr0:    prot.installYr0,
+    protPerYr:     prot.annualPerYr,
+    Nprot:         prot.Nprot,
+    Nunprot:       prot.Nunprot,
+  };
+}
+
+function cumInstallByYear(installYr0, t) {
+  const L = Math.max(1, Math.round(state['lifespan_j']));
+  return installYr0 * (1 + Math.floor(t / L));
+}
+
+function installDueInYear(t) {
+  const L = Math.max(1, Math.round(state['lifespan_j']));
+  return t === 0 || t % L === 0;
+}
+
+function timeSeries(model, T) {
+  const noProt = [];
+  const prot = [];
+  const net = [];
+  let cumulativeNet = 0;
+  for (let t = 0; t <= T; t++) {
+    const noProtCost = t === 0 ? 0 : model.noProtPerYr;
+    const protCost = (t === 0 ? 0 : model.protPerYr) + (installDueInYear(t) ? model.installYr0 : 0);
+    cumulativeNet += noProtCost - protCost;
+    noProt.push(noProtCost);
+    prot.push(protCost);
+    net.push(cumulativeNet);
+  }
+  return { noProt, prot, net };
 }
 
 // === Tabs ===
@@ -438,81 +820,6 @@ function mountModel(scope) {
   });
 
   $('reset-all').addEventListener('click', resetAll);
-
-  // === Model ===
-  function computeLambda() {
-    const s = state;
-    return s['I_y'] * s['N_bears'] * s['P(D_i|food)'];
-  }
-
-  function modelFor(elementKey, lambda) {
-    const s = state;
-    const lambda_i = lambda * s['s_enc_' + elementKey];
-    const N = s['N_' + elementKey];
-    const u = s['u_' + elementKey];
-    const c = s['c_' + elementKey];
-    const pD = s['P(D_' + elementKey + '|B,E)'];
-    const protShare = Math.max(0, Math.min(1, s['s_prot_' + elementKey]));
-    const cInst = s['c_install_' + elementKey];
-    const expectedUnits = pD * lambda_i * u;
-
-    function scenarioAt(share) {
-      const Nprot   = Math.min(Math.round(share * N), N);
-      const Nunprot = Math.max(0, N - Nprot);
-      const unprotUnits   = Math.min(expectedUnits * (1 - share),                Nunprot);
-      const residualUnits = Math.min(expectedUnits * share * s['P(¬M_j)'],       Nprot);
-      const unprotPerYr   = unprotUnits   * c;
-      const residualPerYr = residualUnits * c;
-      const maintPerYr    = s['c_maintenance_' + elementKey] * Nprot;
-      const installYr0    = cInst * Nprot;
-      return {
-        Nprot, Nunprot,
-        unprotPerYr, residualPerYr, maintPerYr, installYr0,
-        annualPerYr: unprotPerYr + residualPerYr + maintPerYr,
-      };
-    }
-
-    const noProt = scenarioAt(0);
-    const prot   = scenarioAt(protShare);
-
-    return {
-      lambda_i,
-      noProtPerYr:   noProt.annualPerYr,
-      unprotPerYr:   prot.unprotPerYr,
-      residualPerYr: prot.residualPerYr,
-      maintPerYr:    prot.maintPerYr,
-      installYr0:    prot.installYr0,
-      protPerYr:     prot.annualPerYr,
-      Nprot:         prot.Nprot,
-      Nunprot:       prot.Nunprot,
-    };
-  }
-
-  function cumInstallByYear(installYr0, t) {
-    const L = Math.max(1, Math.round(state['lifespan_j']));
-    return installYr0 * (1 + Math.floor(t / L));
-  }
-
-  function installDueInYear(t) {
-    const L = Math.max(1, Math.round(state['lifespan_j']));
-    return t === 0 || t % L === 0;
-  }
-
-  function timeSeries(model, T) {
-    const noProt = [];
-    const prot = [];
-    const net = [];
-    let cumulativeNet = 0;
-    for (let t = 0; t <= T; t++) {
-      const noProtCost = t === 0 ? 0 : model.noProtPerYr;
-      const protCost = (t === 0 ? 0 : model.protPerYr) + (installDueInYear(t) ? model.installYr0 : 0);
-      cumulativeNet += noProtCost - protCost;
-      noProt.push(noProtCost);
-      prot.push(protCost);
-      net.push(cumulativeNet);
-    }
-    return { noProt, prot, net };
-  }
 
   // Charts (per-instance — DOM is per-instance even though state is shared)
   const elementCharts = {};
@@ -803,6 +1110,8 @@ if (themeToggle) {
 // === Init ===
 setupTabs();
 buildVariablesTable();
+buildScenariosPage();
+mountScenarioCard();
 mountModel('cm');
 mountModel('sm');
 recomputeAll();
