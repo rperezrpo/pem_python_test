@@ -12,8 +12,8 @@
 
     /* Functional accents */
     --accent:              #d4a04a;  /* interactive: inputs, links, eyebrow */
-    --accent-success:      #6b8e5a;  /* savings, positive emphasis */
-    --accent-success-edge: #4a6b3d;  /* border on success surfaces */
+    --accent-success:      #6fa355;  /* savings, positive emphasis */
+    --accent-success-edge: #4e8339;  /* border on success surfaces */
     --accent-danger:       #c66a3d;  /* loss, warnings */
 
     /* Per-element accents (alias the functional palette) */

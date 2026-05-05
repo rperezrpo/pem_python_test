@@ -231,11 +231,12 @@ const SCENARIO_ROWS = [
   }
 ];
 
-// Range bands expressed as fractions of the slider's [min, max] window.
+// Each level is a factor window applied to the variable's *default* value.
+// e.g. low picks a value in [0.10, 0.70] × default, clamped/snapped to slider bounds.
 const SCENARIO_LEVELS = {
-  low:    { range: [0.05, 0.30] },
-  middle: { range: [0.35, 0.65] },
-  high:   { range: [0.70, 0.95] },
+  low:    { factor: [0.10, 0.70] },
+  middle: { factor: [0.71, 1.40] },
+  high:   { factor: [1.41, 2.00] },
 };
 
 function snapToStep(value, cfg) {
@@ -243,13 +244,19 @@ function snapToStep(value, cfg) {
   return Math.max(cfg.min, Math.min(cfg.max, stepped));
 }
 
+function defaultValueFor(key) {
+  const v = DEFAULTS.find(d => d.notation === key);
+  return v ? Number(v.value) : null;
+}
+
 function pickInBand(key, level) {
   const cfg = SLIDER_CONFIG[key];
   if (!cfg) return null;
-  const [lo, hi] = SCENARIO_LEVELS[level].range;
-  const span = cfg.max - cfg.min;
-  const raw = cfg.min + (lo + Math.random() * (hi - lo)) * span;
-  return snapToStep(raw, cfg);
+  const def = defaultValueFor(key);
+  if (def === null) return null;
+  const [lo, hi] = SCENARIO_LEVELS[level].factor;
+  const factor = lo + Math.random() * (hi - lo);
+  return snapToStep(def * factor, cfg);
 }
 
 function applyScenario(rowId, level) {
@@ -478,11 +485,11 @@ function buildScenariosPage() {
 function valueIsInBand(key, level) {
   const cfg = SLIDER_CONFIG[key];
   if (!cfg) return false;
-  const [lo, hi] = SCENARIO_LEVELS[level].range;
-  const span = cfg.max - cfg.min;
-  if (span <= 0) return false;
-  const fraction = (state[key] - cfg.min) / span;
-  return fraction >= lo && fraction <= hi;
+  const def = defaultValueFor(key);
+  if (def === null || def === 0) return false;
+  const [lo, hi] = SCENARIO_LEVELS[level].factor;
+  const factor = state[key] / def;
+  return factor >= lo && factor <= hi;
 }
 
 function activeLevelForRow(row) {
