@@ -26,6 +26,14 @@ __STYLES__
 <body>
 
 <div class="wrap">
+  <div class="header-controls">
+    <button class="guide-btn" id="guide-btn" type="button" data-page="guide">Guide</button>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+      <span class="theme-toggle-icon" aria-hidden="true"></span>
+      <span class="theme-toggle-text">Theme: Dark</span>
+    </button>
+  </div>
+
   <header>
     <div>
       <div class="eyebrow">Ursus &middot; Cost-Benefit Model</div>
@@ -33,10 +41,6 @@ __STYLES__
       <p class="subtitle">An interactive cost benefit analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages.</p>
     </div>
     <div class="header-side">
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-        <span class="theme-toggle-icon" aria-hidden="true"></span>
-        <span class="theme-toggle-text">Theme: Dark</span>
-      </button>
       <div class="verdict">
       <div class="verdict-label" id="verdict-label">Net Cumulative Outcome</div>
       <div class="verdict-value" id="verdict-value">—</div>
@@ -47,7 +51,7 @@ __STYLES__
 
   <!-- Page navigation -->
   <nav class="tabs" role="tablist">
-    <button type="button" data-page="table">Variables</button>
+    <button type="button" data-page="table">Data Source</button>
     <button type="button" data-page="simple">Simple Model</button>
     <button type="button" data-page="complete" class="active">Complete Model</button>
   </nav>
@@ -209,6 +213,64 @@ __STYLES__
           </details>
         </div>
       </main>
+    </div>
+  </section>
+
+  <!-- Page: Guide -->
+  <section class="page" id="page-guide">
+    <div class="guide-grid">
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Model overview</h2>
+        </div>
+        <div class="card-body">
+          <p>This tool performs a cost-benefit analysis of two strategies for managing bear-caused damage on a single property over a fixed time horizon.</p>
+          <p><strong>No protection</strong> — the owner pays compensation every time a damage event occurs. Costs grow linearly with time and bear pressure.</p>
+          <p><strong>With protection</strong> — the owner installs a protective measure (electric fence, guardian dog, raised platform, etc.) covering a chosen share of each asset type. There is an upfront installation cost and a recurring annual maintenance cost, but losses from protected units are greatly reduced.</p>
+          <p>The model tracks three asset types — small livestock (sheep, goats, poultry), large livestock (cattle, horses), and agriculture (beehives, orchards) — each parameterised separately. The key output is the cumulative cost curve for both strategies, and the year at which protection becomes cheaper (the payback year).</p>
+          <p>Bear encounter pressure is driven by the number of habituated bears in the surrounding area and a baseline incursion rate. The Complete Model additionally exposes a food-availability modifier and per-element encounter distribution.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">How to use the tool</h2>
+        </div>
+        <div class="card-body">
+          <p>All sliders write to a single shared model state. A change made on the Simple Model page is immediately reflected on the Complete Model page and in the Data Source table, and vice versa.</p>
+          <p><strong>General context panel</strong> — set the time horizon, bear pressure, protective measure effectiveness and lifespan. These apply to all asset types.</p>
+          <p><strong>Per-element panels</strong> — tune parameters for each asset type individually: how many units you have, what share is protected, compensation costs, and installation and maintenance costs of the measure.</p>
+          <p><strong>Result cards</strong> — each asset type shows an annual cost breakdown and a cumulative cost chart. The overall chart aggregates all three types and displays the net benefit of protection at the chosen horizon.</p>
+          <p><strong>Reset button</strong> — restores all sliders to the default values from the Excel workbook.</p>
+          <p>The verdict in the page header updates in real time and summarises whether protection or compensation is the better strategy at the chosen time horizon.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Data source</h2>
+        </div>
+        <div class="card-body">
+          <p>All default parameter values are read from <strong>bear_attack_model_variables.xlsx</strong> at build time and embedded into this file. The Data Source page displays the full variable dictionary and allows you to edit any adjustable value directly — changes take effect immediately in both model pages without rebuilding.</p>
+          <p>The workbook contains 31 variables organised into groups: bear pressure, environment modifiers, per-element damage probabilities, encounter shares, maintenance probability, unit counts, units damaged per event, compensation costs, protection coverage, installation and maintenance costs, measure lifespan, and analysis time horizon.</p>
+          <p>Two variables are derived and cannot be edited directly: <strong>s_enc_Ag</strong> (agriculture encounter share) is automatically computed as 1 − s_enc_SL − s_enc_LL so that encounter shares always sum to 100%; <strong>P(¬M_j)</strong> (measure failure probability) is 1 − P(M_j).</p>
+          <p>To change the default values permanently, edit the Excel workbook and regenerate the HTML by running <code>python source/pipeline.py</code>.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Simple vs Complete model</h2>
+        </div>
+        <div class="card-body">
+          <p>The tool offers two views of the same underlying model.</p>
+          <p><strong>Simple Model</strong> — focuses on the parameters most likely to vary between properties: bear count, time horizon, protective measure quality, number of units, share protected, and costs. Advanced parameters (food availability modifier, encounter distribution, units damaged per event) are hidden so the interface stays uncluttered. Suitable for a quick first assessment or for users unfamiliar with the full model.</p>
+          <p><strong>Complete Model</strong> — exposes every parameter in the model. Use this for sensitivity analysis, to understand how food availability or encounter distribution affects the result, or to calibrate the model carefully against observed data.</p>
+          <p>Both views share the same state — sliders changed in one view are visible in the other. The underlying formulas and calculations are identical; only the set of visible controls differs.</p>
+        </div>
+      </div>
+
     </div>
   </section>
 

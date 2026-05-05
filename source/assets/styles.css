@@ -26,7 +26,7 @@
 
     --bg:           #f7f0dc;
     --panel:        #fffaea;
-    --panel-2:      #dde1da;
+    --panel-2:      #d5e2d1;
     --ink:          #221f16;
     --ink-dim:      #6e6754;
     --ink-strong:   #14110a;
@@ -108,10 +108,40 @@
     align-items: flex-end;
     gap: 18px;
   }
+  .header-controls {
+    position: fixed;
+    top: 16px;
+    right: max(32px, calc((100vw - 1500px) / 2 + 32px));
+    z-index: 200;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .guide-btn {
+    display: inline-flex;
+    align-items: center;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    border-radius: 3px;
+  }
+  .guide-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .guide-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--panel-2);
+  }
   .theme-toggle {
-    position: absolute;
-    top: 0;
-    right: 0;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -197,6 +227,32 @@
   .page { display: none; }
   .page.active { display: block; }
 
+  /* ====== Guide page ====== */
+  .guide-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .card-body {
+    padding: 0 24px 20px;
+  }
+  .card-body p {
+    margin: 0 0 12px;
+    color: var(--ink-dim);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body strong { color: var(--ink); font-weight: 600; }
+  .card-body code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--panel-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
   /* ====== Variables table page ====== */
   .variables-table-wrap {
     overflow-x: auto;
@@ -228,12 +284,42 @@
     color: var(--accent);
     white-space: nowrap;
   }
+  #variables-table td.value-cell {
+    text-align: right;
+  }
+  #variables-table tr.readonly td.mono,
+  #variables-table tr.readonly td.mono .mono-text {
+    color: var(--ink-dim);
+  }
   #variables-table td.desc {
     color: var(--ink-dim);
     max-width: 640px;
   }
   #variables-table tbody tr:hover td {
     background: var(--panel-2);
+  }
+  #variables-table input.var-input {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 4px 8px;
+    width: 110px;
+    text-align: right;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  #variables-table input.var-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  #variables-table input.var-input::-webkit-outer-spin-button,
+  #variables-table input.var-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
   }
 
   .panel {

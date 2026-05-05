@@ -8,7 +8,7 @@ const SLIDER_CONFIG = {
   "N_bears":       {min:0, max:50,   step:1,    fmt:'int',  section:'general:bear'},
 
   // --- General: Environment modifiers ---
-  "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
+  "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear', hideInScopes:['sm']},
 
   // --- General: Protective measure ---
   "P(M_j)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:measure'},
@@ -18,34 +18,34 @@ const SLIDER_CONFIG = {
   "T":             {min:1, max:50,   step:1,    fmt:'yr',   section:'general:time'},
 
   // --- General: Distribution of encounters by element type ---
-  "s_enc_SL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
-  "s_enc_LL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
-  "s_enc_Ag":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
+  "s_enc_SL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
+  "s_enc_LL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
+  "s_enc_Ag":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
 
   // --- Per-element: Small Livestock ---
   "P(D_SL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
   "N_SL":          {min:0, max:35000,step:10,   fmt:'int',  section:'SL'},
-  "u_SL":          {min:0, max:30,   step:1,    fmt:'int',  section:'SL'},
-  "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
+  "u_SL":          {min:0, max:30,   step:1,    fmt:'int',  section:'SL', hideInScopes:['sm']},
   "s_prot_SL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
+  "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
   "c_install_SL":  {min:0, max:500,  step:5,    fmt:'eur',  section:'SL'},
   "c_maintenance_SL":{min:0, max:100, step:1,   fmt:'eur',  section:'SL'},
 
   // --- Per-element: Large Livestock ---
   "P(D_LL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
   "N_LL":          {min:0, max:10000,step:10,    fmt:'int',  section:'LL'},
-  "u_LL":          {min:0, max:10,   step:1,    fmt:'int',  section:'LL'},
-  "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
+  "u_LL":          {min:0, max:10,   step:1,    fmt:'int',  section:'LL', hideInScopes:['sm']},
   "s_prot_LL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
+  "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
   "c_install_LL":  {min:0, max:1000, step:10,   fmt:'eur',  section:'LL'},
   "c_maintenance_LL":{min:0, max:200, step:1,   fmt:'eur',  section:'LL'},
 
   // --- Per-element: Agriculture ---
   "P(D_Ag|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
   "N_Ag":          {min:0, max:20000,step:10,   fmt:'int',  section:'Ag'},
-  "u_Ag":          {min:0, max:30,   step:1,    fmt:'int',  section:'Ag'},
-  "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
+  "u_Ag":          {min:0, max:30,   step:1,    fmt:'int',  section:'Ag', hideInScopes:['sm']},
   "s_prot_Ag":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
+  "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
   "c_install_Ag":  {min:0, max:500,  step:5,    fmt:'eur',  section:'Ag'},
   "c_maintenance_Ag":{min:0, max:100, step:1,   fmt:'eur',  section:'Ag'},
 };
@@ -188,7 +188,7 @@ resetEncounterSharesFromDefaults();
 
 function recomputeAll() {
   modelInstances.forEach(i => i.recompute());
-  renderVariablesTable();
+  updateVariablesTableValues();
 }
 
 function resetAll() {
@@ -201,36 +201,118 @@ function resetAll() {
 
 // === Tabs ===
 function setupTabs() {
-  const buttons = document.querySelectorAll('.tabs button');
-  buttons.forEach(btn => {
+  const tabButtons = document.querySelectorAll('.tabs button[data-page]');
+  const allPageButtons = document.querySelectorAll('[data-page]');
+  allPageButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const page = btn.dataset.page;
       document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
-      buttons.forEach(b => b.classList.toggle('active', b === btn));
+      tabButtons.forEach(b => b.classList.toggle('active', b.dataset.page === page));
+      allPageButtons.forEach(b => {
+        if (!b.closest('.tabs')) b.classList.toggle('active', b.dataset.page === page);
+      });
     });
   });
 }
 
 // === Variables table ===
-function renderVariablesTable() {
+// Built once at init. Editable (number input) for variables that have a slider
+// config; read-only span for derived/auto values. While the user is typing,
+// recomputeAll() updates other cells but leaves the focused input alone.
+const variablesTableRows = [];
+
+function formatReadOnlyValue(notation, current, fallback) {
+  if (current === undefined || current === null || Number.isNaN(current)) {
+    return String(fallback ?? '');
+  }
+  if (notation === 'P(¬M_j)') {
+    return Number(Number(current).toFixed(3)).toString();
+  }
+  const cfg = SLIDER_CONFIG[notation];
+  if (cfg && fmt[cfg.fmt]) return fmt[cfg.fmt](current);
+  return String(current);
+}
+
+function buildVariablesTable() {
   const tbody = document.querySelector('#variables-table tbody');
   if (!tbody) return;
-  const escape = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const fmtVal = (notation, fallback) => {
-    const cfg = SLIDER_CONFIG[notation];
+  variablesTableRows.length = 0;
+  tbody.textContent = '';
+
+  VARIABLES.forEach(v => {
+    const tr = document.createElement('tr');
+    const cfg = SLIDER_CONFIG[v.notation];
+    const editable = !!cfg && v.notation !== AUTO_SHARE_KEY;
+    if (!editable) tr.classList.add('readonly');
+
+    const tdName = document.createElement('td');
+    tdName.textContent = v.name || '';
+
+    const tdNotation = document.createElement('td');
+    tdNotation.className = 'mono';
+    tdNotation.textContent = v.notation || '';
+
+    const tdValue = document.createElement('td');
+    tdValue.className = 'mono value-cell';
+
+    let valueEl;
+    if (editable) {
+      valueEl = document.createElement('input');
+      valueEl.type = 'number';
+      valueEl.className = 'var-input';
+      valueEl.dataset.key = v.notation;
+      valueEl.min = cfg.min;
+      valueEl.max = cfg.max;
+      valueEl.step = cfg.step;
+      valueEl.value = state[v.notation];
+
+      valueEl.addEventListener('input', () => {
+        const raw = Number(valueEl.value);
+        if (Number.isNaN(raw)) return;
+        const clamped = Math.max(cfg.min, Math.min(cfg.max, raw));
+        state[v.notation] = clamped;
+        if (v.notation === 'P(M_j)') state['P(¬M_j)'] = 1 - state[v.notation];
+        if (USER_SHARE_KEYS.includes(v.notation)) updateEncounterShares(v.notation);
+        setSliderValueAll(v.notation);
+        recomputeAll();
+      });
+
+      valueEl.addEventListener('blur', () => {
+        // On blur, normalise the displayed value to the clamped state value.
+        valueEl.value = state[v.notation];
+      });
+    } else {
+      valueEl = document.createElement('span');
+      valueEl.className = 'mono-text';
+      valueEl.textContent = formatReadOnlyValue(v.notation, state[v.notation], v.value);
+    }
+    tdValue.appendChild(valueEl);
+
+    const tdDesc = document.createElement('td');
+    tdDesc.className = 'desc';
+    tdDesc.textContent = v.description || '';
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdNotation);
+    tr.appendChild(tdValue);
+    tr.appendChild(tdDesc);
+    tbody.appendChild(tr);
+
+    variablesTableRows.push({ notation: v.notation, valueEl, editable, fallback: v.value });
+  });
+}
+
+function updateVariablesTableValues() {
+  variablesTableRows.forEach(({ notation, valueEl, editable, fallback }) => {
     const cur = state[notation];
-    if (cur === undefined || cur === null || Number.isNaN(cur)) return escape(fallback);
-    if (cfg && fmt[cfg.fmt]) return escape(fmt[cfg.fmt](cur));
-    return escape(cur);
-  };
-  tbody.innerHTML = VARIABLES.map(v => `
-    <tr>
-      <td>${escape(v.name)}</td>
-      <td class="mono">${escape(v.notation)}</td>
-      <td class="mono">${fmtVal(v.notation, v.value)}</td>
-      <td class="desc">${escape(v.description)}</td>
-    </tr>
-  `).join('');
+    if (editable) {
+      if (document.activeElement !== valueEl) {
+        valueEl.value = cur;
+      }
+    } else {
+      valueEl.textContent = formatReadOnlyValue(notation, cur, fallback);
+    }
+  });
 }
 
 // === Model instance (DOM + charts only — state is shared) ===
@@ -274,7 +356,10 @@ function mountModel(scope) {
   `;
   GENERAL_SUBSECTIONS.forEach(sub => {
     const sectionId = 'general:' + sub.id;
-    const items = Object.keys(SLIDER_CONFIG).filter(n => SLIDER_CONFIG[n].section === sectionId);
+    const items = Object.keys(SLIDER_CONFIG).filter(n => {
+      const cfg = SLIDER_CONFIG[n];
+      return cfg.section === sectionId && !(cfg.hideInScopes && cfg.hideInScopes.includes(scope));
+    });
     if (!items.length) return;
     const header = document.createElement('div');
     header.className = 'general-subsection';
@@ -296,7 +381,10 @@ function mountModel(scope) {
   // Per-element panels
   const elementBoard = $('element-board');
   ELEMENT_PANELS.forEach(ep => {
-    const items = Object.keys(SLIDER_CONFIG).filter(n => SLIDER_CONFIG[n].section === ep.key);
+    const items = Object.keys(SLIDER_CONFIG).filter(n => {
+      const cfg = SLIDER_CONFIG[n];
+      return cfg.section === ep.key && !(cfg.hideInScopes && cfg.hideInScopes.includes(scope));
+    });
     const panel = document.createElement('div');
     panel.className = 'element-panel ' + ep.cls;
     panel.innerHTML = `
@@ -714,6 +802,7 @@ if (themeToggle) {
 
 // === Init ===
 setupTabs();
+buildVariablesTable();
 mountModel('cm');
 mountModel('sm');
 recomputeAll();

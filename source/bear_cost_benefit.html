@@ -48,7 +48,7 @@
 
     --bg:           #f7f0dc;
     --panel:        #fffaea;
-    --panel-2:      #dde1da;
+    --panel-2:      #d5e2d1;
     --ink:          #221f16;
     --ink-dim:      #6e6754;
     --ink-strong:   #14110a;
@@ -130,10 +130,40 @@
     align-items: flex-end;
     gap: 18px;
   }
+  .header-controls {
+    position: fixed;
+    top: 16px;
+    right: max(32px, calc((100vw - 1500px) / 2 + 32px));
+    z-index: 200;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .guide-btn {
+    display: inline-flex;
+    align-items: center;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    border-radius: 3px;
+  }
+  .guide-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .guide-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--panel-2);
+  }
   .theme-toggle {
-    position: absolute;
-    top: 0;
-    right: 0;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -219,6 +249,32 @@
   .page { display: none; }
   .page.active { display: block; }
 
+  /* ====== Guide page ====== */
+  .guide-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .card-body {
+    padding: 0 24px 20px;
+  }
+  .card-body p {
+    margin: 0 0 12px;
+    color: var(--ink-dim);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+  .card-body p:last-child { margin-bottom: 0; }
+  .card-body strong { color: var(--ink); font-weight: 600; }
+  .card-body code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--panel-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
   /* ====== Variables table page ====== */
   .variables-table-wrap {
     overflow-x: auto;
@@ -250,12 +306,42 @@
     color: var(--accent);
     white-space: nowrap;
   }
+  #variables-table td.value-cell {
+    text-align: right;
+  }
+  #variables-table tr.readonly td.mono,
+  #variables-table tr.readonly td.mono .mono-text {
+    color: var(--ink-dim);
+  }
   #variables-table td.desc {
     color: var(--ink-dim);
     max-width: 640px;
   }
   #variables-table tbody tr:hover td {
     background: var(--panel-2);
+  }
+  #variables-table input.var-input {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 4px 8px;
+    width: 110px;
+    text-align: right;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  #variables-table input.var-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  #variables-table input.var-input::-webkit-outer-spin-button,
+  #variables-table input.var-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
   }
 
   .panel {
@@ -746,6 +832,14 @@
 <body>
 
 <div class="wrap">
+  <div class="header-controls">
+    <button class="guide-btn" id="guide-btn" type="button" data-page="guide">Guide</button>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+      <span class="theme-toggle-icon" aria-hidden="true"></span>
+      <span class="theme-toggle-text">Theme: Dark</span>
+    </button>
+  </div>
+
   <header>
     <div>
       <div class="eyebrow">Ursus &middot; Cost-Benefit Model</div>
@@ -753,10 +847,6 @@
       <p class="subtitle">An interactive cost benefit analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages.</p>
     </div>
     <div class="header-side">
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-        <span class="theme-toggle-icon" aria-hidden="true"></span>
-        <span class="theme-toggle-text">Theme: Dark</span>
-      </button>
       <div class="verdict">
       <div class="verdict-label" id="verdict-label">Net Cumulative Outcome</div>
       <div class="verdict-value" id="verdict-value">—</div>
@@ -767,7 +857,7 @@
 
   <!-- Page navigation -->
   <nav class="tabs" role="tablist">
-    <button type="button" data-page="table">Variables</button>
+    <button type="button" data-page="table">Data Source</button>
     <button type="button" data-page="simple">Simple Model</button>
     <button type="button" data-page="complete" class="active">Complete Model</button>
   </nav>
@@ -932,6 +1022,64 @@
     </div>
   </section>
 
+  <!-- Page: Guide -->
+  <section class="page" id="page-guide">
+    <div class="guide-grid">
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Model overview</h2>
+        </div>
+        <div class="card-body">
+          <p>This tool performs a cost-benefit analysis of two strategies for managing bear-caused damage on a single property over a fixed time horizon.</p>
+          <p><strong>No protection</strong> — the owner pays compensation every time a damage event occurs. Costs grow linearly with time and bear pressure.</p>
+          <p><strong>With protection</strong> — the owner installs a protective measure (electric fence, guardian dog, raised platform, etc.) covering a chosen share of each asset type. There is an upfront installation cost and a recurring annual maintenance cost, but losses from protected units are greatly reduced.</p>
+          <p>The model tracks three asset types — small livestock (sheep, goats, poultry), large livestock (cattle, horses), and agriculture (beehives, orchards) — each parameterised separately. The key output is the cumulative cost curve for both strategies, and the year at which protection becomes cheaper (the payback year).</p>
+          <p>Bear encounter pressure is driven by the number of habituated bears in the surrounding area and a baseline incursion rate. The Complete Model additionally exposes a food-availability modifier and per-element encounter distribution.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">How to use the tool</h2>
+        </div>
+        <div class="card-body">
+          <p>All sliders write to a single shared model state. A change made on the Simple Model page is immediately reflected on the Complete Model page and in the Data Source table, and vice versa.</p>
+          <p><strong>General context panel</strong> — set the time horizon, bear pressure, protective measure effectiveness and lifespan. These apply to all asset types.</p>
+          <p><strong>Per-element panels</strong> — tune parameters for each asset type individually: how many units you have, what share is protected, compensation costs, and installation and maintenance costs of the measure.</p>
+          <p><strong>Result cards</strong> — each asset type shows an annual cost breakdown and a cumulative cost chart. The overall chart aggregates all three types and displays the net benefit of protection at the chosen horizon.</p>
+          <p><strong>Reset button</strong> — restores all sliders to the default values from the Excel workbook.</p>
+          <p>The verdict in the page header updates in real time and summarises whether protection or compensation is the better strategy at the chosen time horizon.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Data source</h2>
+        </div>
+        <div class="card-body">
+          <p>All default parameter values are read from <strong>bear_attack_model_variables.xlsx</strong> at build time and embedded into this file. The Data Source page displays the full variable dictionary and allows you to edit any adjustable value directly — changes take effect immediately in both model pages without rebuilding.</p>
+          <p>The workbook contains 31 variables organised into groups: bear pressure, environment modifiers, per-element damage probabilities, encounter shares, maintenance probability, unit counts, units damaged per event, compensation costs, protection coverage, installation and maintenance costs, measure lifespan, and analysis time horizon.</p>
+          <p>Two variables are derived and cannot be edited directly: <strong>s_enc_Ag</strong> (agriculture encounter share) is automatically computed as 1 − s_enc_SL − s_enc_LL so that encounter shares always sum to 100%; <strong>P(¬M_j)</strong> (measure failure probability) is 1 − P(M_j).</p>
+          <p>To change the default values permanently, edit the Excel workbook and regenerate the HTML by running <code>python source/pipeline.py</code>.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 class="card-title">Simple vs Complete model</h2>
+        </div>
+        <div class="card-body">
+          <p>The tool offers two views of the same underlying model.</p>
+          <p><strong>Simple Model</strong> — focuses on the parameters most likely to vary between properties: bear count, time horizon, protective measure quality, number of units, share protected, and costs. Advanced parameters (food availability modifier, encounter distribution, units damaged per event) are hidden so the interface stays uncluttered. Suitable for a quick first assessment or for users unfamiliar with the full model.</p>
+          <p><strong>Complete Model</strong> — exposes every parameter in the model. Use this for sensitivity analysis, to understand how food availability or encounter distribution affects the result, or to calibrate the model carefully against observed data.</p>
+          <p>Both views share the same state — sliders changed in one view are visible in the other. The underlying formulas and calculations are identical; only the set of visible controls differs.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <div class="footer">
     Generated from bear_attack_model_variables.xlsx &middot; Adjust sliders to model your scenario &middot; All values in EUR
   </div>
@@ -948,7 +1096,7 @@ const SLIDER_CONFIG = {
   "N_bears":       {min:0, max:50,   step:1,    fmt:'int',  section:'general:bear'},
 
   // --- General: Environment modifiers ---
-  "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear'},
+  "P(D_i|food)":   {min:0.5, max:2,  step:0.05, fmt:'mult', section:'general:bear', hideInScopes:['sm']},
 
   // --- General: Protective measure ---
   "P(M_j)":        {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:measure'},
@@ -958,34 +1106,34 @@ const SLIDER_CONFIG = {
   "T":             {min:1, max:50,   step:1,    fmt:'yr',   section:'general:time'},
 
   // --- General: Distribution of encounters by element type ---
-  "s_enc_SL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
-  "s_enc_LL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
-  "s_enc_Ag":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true},
+  "s_enc_SL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
+  "s_enc_LL":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
+  "s_enc_Ag":      {min:0, max:1,    step:0.01, fmt:'pct',  section:'general:encounter-share', share:true, hideInScopes:['sm']},
 
   // --- Per-element: Small Livestock ---
   "P(D_SL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
   "N_SL":          {min:0, max:35000,step:10,   fmt:'int',  section:'SL'},
-  "u_SL":          {min:0, max:30,   step:1,    fmt:'int',  section:'SL'},
-  "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
+  "u_SL":          {min:0, max:30,   step:1,    fmt:'int',  section:'SL', hideInScopes:['sm']},
   "s_prot_SL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'SL'},
+  "c_SL":          {min:0, max:1000, step:10,   fmt:'eur',  section:'SL'},
   "c_install_SL":  {min:0, max:500,  step:5,    fmt:'eur',  section:'SL'},
   "c_maintenance_SL":{min:0, max:100, step:1,   fmt:'eur',  section:'SL'},
 
   // --- Per-element: Large Livestock ---
   "P(D_LL|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
   "N_LL":          {min:0, max:10000,step:10,    fmt:'int',  section:'LL'},
-  "u_LL":          {min:0, max:10,   step:1,    fmt:'int',  section:'LL'},
-  "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
+  "u_LL":          {min:0, max:10,   step:1,    fmt:'int',  section:'LL', hideInScopes:['sm']},
   "s_prot_LL":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'LL'},
+  "c_LL":          {min:0, max:5000, step:50,   fmt:'eur',  section:'LL'},
   "c_install_LL":  {min:0, max:1000, step:10,   fmt:'eur',  section:'LL'},
   "c_maintenance_LL":{min:0, max:200, step:1,   fmt:'eur',  section:'LL'},
 
   // --- Per-element: Agriculture ---
   "P(D_Ag|B,E)":   {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
   "N_Ag":          {min:0, max:20000,step:10,   fmt:'int',  section:'Ag'},
-  "u_Ag":          {min:0, max:30,   step:1,    fmt:'int',  section:'Ag'},
-  "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
+  "u_Ag":          {min:0, max:30,   step:1,    fmt:'int',  section:'Ag', hideInScopes:['sm']},
   "s_prot_Ag":     {min:0, max:1,    step:0.01, fmt:'pct',  section:'Ag'},
+  "c_Ag":          {min:0, max:1500, step:10,   fmt:'eur',  section:'Ag'},
   "c_install_Ag":  {min:0, max:500,  step:5,    fmt:'eur',  section:'Ag'},
   "c_maintenance_Ag":{min:0, max:100, step:1,   fmt:'eur',  section:'Ag'},
 };
@@ -1128,7 +1276,7 @@ resetEncounterSharesFromDefaults();
 
 function recomputeAll() {
   modelInstances.forEach(i => i.recompute());
-  renderVariablesTable();
+  updateVariablesTableValues();
 }
 
 function resetAll() {
@@ -1141,36 +1289,118 @@ function resetAll() {
 
 // === Tabs ===
 function setupTabs() {
-  const buttons = document.querySelectorAll('.tabs button');
-  buttons.forEach(btn => {
+  const tabButtons = document.querySelectorAll('.tabs button[data-page]');
+  const allPageButtons = document.querySelectorAll('[data-page]');
+  allPageButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const page = btn.dataset.page;
       document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
-      buttons.forEach(b => b.classList.toggle('active', b === btn));
+      tabButtons.forEach(b => b.classList.toggle('active', b.dataset.page === page));
+      allPageButtons.forEach(b => {
+        if (!b.closest('.tabs')) b.classList.toggle('active', b.dataset.page === page);
+      });
     });
   });
 }
 
 // === Variables table ===
-function renderVariablesTable() {
+// Built once at init. Editable (number input) for variables that have a slider
+// config; read-only span for derived/auto values. While the user is typing,
+// recomputeAll() updates other cells but leaves the focused input alone.
+const variablesTableRows = [];
+
+function formatReadOnlyValue(notation, current, fallback) {
+  if (current === undefined || current === null || Number.isNaN(current)) {
+    return String(fallback ?? '');
+  }
+  if (notation === 'P(¬M_j)') {
+    return Number(Number(current).toFixed(3)).toString();
+  }
+  const cfg = SLIDER_CONFIG[notation];
+  if (cfg && fmt[cfg.fmt]) return fmt[cfg.fmt](current);
+  return String(current);
+}
+
+function buildVariablesTable() {
   const tbody = document.querySelector('#variables-table tbody');
   if (!tbody) return;
-  const escape = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const fmtVal = (notation, fallback) => {
-    const cfg = SLIDER_CONFIG[notation];
+  variablesTableRows.length = 0;
+  tbody.textContent = '';
+
+  VARIABLES.forEach(v => {
+    const tr = document.createElement('tr');
+    const cfg = SLIDER_CONFIG[v.notation];
+    const editable = !!cfg && v.notation !== AUTO_SHARE_KEY;
+    if (!editable) tr.classList.add('readonly');
+
+    const tdName = document.createElement('td');
+    tdName.textContent = v.name || '';
+
+    const tdNotation = document.createElement('td');
+    tdNotation.className = 'mono';
+    tdNotation.textContent = v.notation || '';
+
+    const tdValue = document.createElement('td');
+    tdValue.className = 'mono value-cell';
+
+    let valueEl;
+    if (editable) {
+      valueEl = document.createElement('input');
+      valueEl.type = 'number';
+      valueEl.className = 'var-input';
+      valueEl.dataset.key = v.notation;
+      valueEl.min = cfg.min;
+      valueEl.max = cfg.max;
+      valueEl.step = cfg.step;
+      valueEl.value = state[v.notation];
+
+      valueEl.addEventListener('input', () => {
+        const raw = Number(valueEl.value);
+        if (Number.isNaN(raw)) return;
+        const clamped = Math.max(cfg.min, Math.min(cfg.max, raw));
+        state[v.notation] = clamped;
+        if (v.notation === 'P(M_j)') state['P(¬M_j)'] = 1 - state[v.notation];
+        if (USER_SHARE_KEYS.includes(v.notation)) updateEncounterShares(v.notation);
+        setSliderValueAll(v.notation);
+        recomputeAll();
+      });
+
+      valueEl.addEventListener('blur', () => {
+        // On blur, normalise the displayed value to the clamped state value.
+        valueEl.value = state[v.notation];
+      });
+    } else {
+      valueEl = document.createElement('span');
+      valueEl.className = 'mono-text';
+      valueEl.textContent = formatReadOnlyValue(v.notation, state[v.notation], v.value);
+    }
+    tdValue.appendChild(valueEl);
+
+    const tdDesc = document.createElement('td');
+    tdDesc.className = 'desc';
+    tdDesc.textContent = v.description || '';
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdNotation);
+    tr.appendChild(tdValue);
+    tr.appendChild(tdDesc);
+    tbody.appendChild(tr);
+
+    variablesTableRows.push({ notation: v.notation, valueEl, editable, fallback: v.value });
+  });
+}
+
+function updateVariablesTableValues() {
+  variablesTableRows.forEach(({ notation, valueEl, editable, fallback }) => {
     const cur = state[notation];
-    if (cur === undefined || cur === null || Number.isNaN(cur)) return escape(fallback);
-    if (cfg && fmt[cfg.fmt]) return escape(fmt[cfg.fmt](cur));
-    return escape(cur);
-  };
-  tbody.innerHTML = VARIABLES.map(v => `
-    <tr>
-      <td>${escape(v.name)}</td>
-      <td class="mono">${escape(v.notation)}</td>
-      <td class="mono">${fmtVal(v.notation, v.value)}</td>
-      <td class="desc">${escape(v.description)}</td>
-    </tr>
-  `).join('');
+    if (editable) {
+      if (document.activeElement !== valueEl) {
+        valueEl.value = cur;
+      }
+    } else {
+      valueEl.textContent = formatReadOnlyValue(notation, cur, fallback);
+    }
+  });
 }
 
 // === Model instance (DOM + charts only — state is shared) ===
@@ -1214,7 +1444,10 @@ function mountModel(scope) {
   `;
   GENERAL_SUBSECTIONS.forEach(sub => {
     const sectionId = 'general:' + sub.id;
-    const items = Object.keys(SLIDER_CONFIG).filter(n => SLIDER_CONFIG[n].section === sectionId);
+    const items = Object.keys(SLIDER_CONFIG).filter(n => {
+      const cfg = SLIDER_CONFIG[n];
+      return cfg.section === sectionId && !(cfg.hideInScopes && cfg.hideInScopes.includes(scope));
+    });
     if (!items.length) return;
     const header = document.createElement('div');
     header.className = 'general-subsection';
@@ -1236,7 +1469,10 @@ function mountModel(scope) {
   // Per-element panels
   const elementBoard = $('element-board');
   ELEMENT_PANELS.forEach(ep => {
-    const items = Object.keys(SLIDER_CONFIG).filter(n => SLIDER_CONFIG[n].section === ep.key);
+    const items = Object.keys(SLIDER_CONFIG).filter(n => {
+      const cfg = SLIDER_CONFIG[n];
+      return cfg.section === ep.key && !(cfg.hideInScopes && cfg.hideInScopes.includes(scope));
+    });
     const panel = document.createElement('div');
     panel.className = 'element-panel ' + ep.cls;
     panel.innerHTML = `
@@ -1654,6 +1890,7 @@ if (themeToggle) {
 
 // === Init ===
 setupTabs();
+buildVariablesTable();
 mountModel('cm');
 mountModel('sm');
 recomputeAll();
