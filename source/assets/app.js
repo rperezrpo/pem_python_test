@@ -234,29 +234,39 @@ const SCENARIO_ROWS = [
 // Each level is a factor window applied to the variable's *default* value.
 // e.g. low picks a value in [0.10, 0.70] × default, clamped/snapped to slider bounds.
 const SCENARIO_LEVELS = {
-  low:    { factor: [0.10, 0.70] },
-  middle: { factor: [0.71, 1.40] },
-  high:   { factor: [1.41, 2.00] },
+  low:    { factor: [0, 0.70] },
+  middle: { factor: [0.70001, 1.40] },
+  high:   { factor: [1.40001, 2.00] },
 };
-
-function snapToStep(value, cfg) {
-  const stepped = Math.round((value - cfg.min) / cfg.step) * cfg.step + cfg.min;
-  return Math.max(cfg.min, Math.min(cfg.max, stepped));
-}
 
 function defaultValueFor(key) {
   const v = DEFAULTS.find(d => d.notation === key);
   return v ? Number(v.value) : null;
 }
 
+// Round to the slider's step for clean values, but keep the result inside the
+// band's factor window — otherwise step rounding can push a value past the
+// band's edge (e.g. raw 70.5 → 70, where 70/50 = 1.40 < high.lo = 1.41) and
+// the factor-based active check stops matching the button that was clicked.
 function pickInBand(key, level) {
   const cfg = SLIDER_CONFIG[key];
   if (!cfg) return null;
   const def = defaultValueFor(key);
-  if (def === null) return null;
+  if (def === null || def === 0) return null;
   const [lo, hi] = SCENARIO_LEVELS[level].factor;
   const factor = lo + Math.random() * (hi - lo);
-  return snapToStep(def * factor, cfg);
+  const raw = def * factor;
+  // Smallest / largest step-aligned values that still fall inside the band.
+  const stepLow  = Math.ceil((lo * def - cfg.min) / cfg.step) * cfg.step + cfg.min;
+  const stepHigh = Math.floor((hi * def - cfg.min) / cfg.step) * cfg.step + cfg.min;
+  if (stepHigh < stepLow) {
+    // Band is narrower than one step — pick the closer of the two endpoints.
+    return Math.abs(raw - stepLow) <= Math.abs(raw - stepHigh) ? stepLow : stepHigh;
+  }
+  let rounded = Math.round((raw - cfg.min) / cfg.step) * cfg.step + cfg.min;
+  if (rounded < stepLow)  rounded = stepLow;
+  if (rounded > stepHigh) rounded = stepHigh;
+  return rounded;
 }
 
 function applyScenario(rowId, level) {
@@ -299,7 +309,7 @@ function mountScenarioCard() {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'bottom', labels: lineLegendLabels },
+        legend: { display: false },
         tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtMoney(ctx.raw) } }
       },
       scales: {
@@ -309,6 +319,72 @@ function mountScenarioCard() {
       elements: { point: { radius: 2, hoverRadius: 5 }, line: { borderWidth: 2, tension: 0 } }
     }
   });
+}
+
+// Smaller line sample for the custom scenario legend (2/3 of the default).
+function scenarioLegendSwatch(color, dash = [], lineWidth = 2, fill = false) {
+  const width = 28;
+  const height = 10;
+  const inset = 2;
+  const scale = window.devicePixelRatio || 1;
+  const canvas = document.createElement('canvas');
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  if (fill) {
+    ctx.fillStyle = color + '40';
+    ctx.fillRect(0, height / 2, width - inset, height / 2);
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.lineCap = 'butt';
+  ctx.setLineDash(dash);
+  ctx.beginPath();
+  ctx.moveTo(0, height / 2);
+  ctx.lineTo(width - inset, height / 2);
+  ctx.stroke();
+  return canvas;
+}
+
+function renderScenarioLegend(elements) {
+  const root = document.getElementById('scenario-legend');
+  if (!root) return;
+  root.innerHTML = '';
+  elements.forEach(({name, color}) => {
+    const col = document.createElement('div');
+    col.className = 'scenario-legend-col';
+    col.innerHTML = `
+      <div class="scenario-legend-title">${name}</div>
+      <div class="scenario-legend-item">
+        <span class="scenario-legend-sample" data-kind="dashed"></span>
+        <span>Without protection</span>
+      </div>
+      <div class="scenario-legend-item">
+        <span class="scenario-legend-sample" data-kind="solid"></span>
+        <span>With protection</span>
+      </div>
+    `;
+    col.querySelector('[data-kind="dashed"]').appendChild(scenarioLegendSwatch(color, [5, 3]));
+    col.querySelector('[data-kind="solid"]').appendChild(scenarioLegendSwatch(color, []));
+    root.appendChild(col);
+  });
+  const grayColor = cssVar('--ink-dim');
+  const netCol = document.createElement('div');
+  netCol.className = 'scenario-legend-col';
+  netCol.innerHTML = `
+    <div class="scenario-legend-title">Net Benefit</div>
+    <div class="scenario-legend-item">
+      <span class="scenario-legend-sample" data-kind="net"></span>
+      <span>Net benefit</span>
+    </div>
+  `;
+  netCol.querySelector('[data-kind="net"]').appendChild(
+    scenarioLegendSwatch(grayColor, [2, 3], 1.5, true)
+  );
+  root.appendChild(netCol);
 }
 
 function recomputeScenarioCard() {
@@ -416,7 +492,7 @@ function recomputeScenarioCard() {
       cumNoProt.push(rn); cumProt.push(rp);
     }
     datasets.push({
-      label: `${name} — no protection`,
+      label: `${name} — without protection`,
       data: cumNoProt,
       borderColor: color,
       backgroundColor: color + '14',
@@ -433,7 +509,7 @@ function recomputeScenarioCard() {
   });
   const grayColor = cssVar('--ink-dim');
   datasets.push({
-    label: 'Net benefit (no-prot − prot)',
+    label: 'Net benefit',
     data: cumNetSeries,
     borderColor: grayColor,
     backgroundColor: grayColor + '26',
@@ -445,6 +521,7 @@ function recomputeScenarioCard() {
   scenarioChart.data.labels = labels;
   scenarioChart.data.datasets = datasets;
   scenarioChart.update();
+  renderScenarioLegend(elements);
 }
 
 function buildScenariosPage() {
@@ -1117,6 +1194,8 @@ if (themeToggle) {
 // === Init ===
 setupTabs();
 buildVariablesTable();
+const tableResetBtn = document.getElementById('table-reset-all');
+if (tableResetBtn) tableResetBtn.addEventListener('click', resetAll);
 buildScenariosPage();
 mountScenarioCard();
 mountModel('cm');

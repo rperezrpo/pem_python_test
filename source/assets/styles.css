@@ -24,9 +24,9 @@
   html[data-theme="light"] {
     color-scheme: light;
 
-    --bg:           #f7f0dc;
-    --panel:        #fffaea;
-    --panel-2:      #d5e2d1;
+    --bg:           #fdf8e9;
+    --panel:        #f9f7ef;
+    --panel-2:      #faf2df;
     --ink:          #221f16;
     --ink-dim:      #6e6754;
     --ink-strong:   #14110a;
@@ -283,6 +283,54 @@
   }
   .page { display: none; }
   .page.active { display: block; }
+
+  /* ====== Scenario summary card chart + legend ====== */
+  .scenario-results-grid { align-items: stretch; }
+  .scenario-chart-stack {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 360px;
+  }
+  .scenario-chart-box {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+  .scenario-legend {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 18px;
+    padding-top: 16px;
+    margin-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .scenario-legend-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .scenario-legend-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 4px;
+  }
+  .scenario-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .scenario-legend-sample {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+  }
 
   /* ====== Scenarios page ====== */
   .scenario-rows {
@@ -720,6 +768,15 @@
     justify-content: space-between;
     align-items: baseline;
     margin-bottom: 20px;
+  }
+  .card-head-with-action {
+    align-items: center;
+    gap: 16px;
+  }
+  .card-head-with-action > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
   .card-title {
     font-family: 'Fraunces', serif;

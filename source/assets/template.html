@@ -47,7 +47,7 @@ __STYLES__
 <div class="wrap">
   <header>
     <div>
-      <h1>To <em>protect</em> or to compensate?</h1>
+      <h1>Protect or compensate?</h1>
       <p class="subtitle">An interactive cost-benefit analysis between protective infrastructure and paying compensation for bear-caused damages.</p>
     </div>
     <div class="header-side">
@@ -62,9 +62,12 @@ __STYLES__
   <!-- Page: Variables table -->
   <section class="page" id="page-table">
     <div class="card">
-      <div class="card-head">
-        <h2 class="card-title">Model variables</h2>
-        <span class="card-sub">Sourced from bear_attack_model_variables.xlsx</span>
+      <div class="card-head card-head-with-action">
+        <div>
+          <h2 class="card-title">Model variables</h2>
+          <span class="card-sub">Sourced from bear_attack_model_variables.xlsx</span>
+        </div>
+        <button class="reset-btn" id="table-reset-all" type="button">Reset all to defaults</button>
       </div>
       <div class="variables-table-wrap">
         <table id="variables-table">
@@ -235,14 +238,17 @@ __STYLES__
         <h2 class="card-title">Scenario summary</h2>
         <span class="card-sub" id="scenario-card-sub">Per-year &middot; EUR</span>
       </div>
-      <div class="element-results-grid">
+      <div class="element-results-grid scenario-results-grid">
         <div>
           <table class="metric-table">
             <tbody id="scenario-metrics"></tbody>
           </table>
         </div>
-        <div class="chart-box">
-          <canvas id="scenarioChart"></canvas>
+        <div class="scenario-chart-stack">
+          <div class="chart-box scenario-chart-box">
+            <canvas id="scenarioChart"></canvas>
+          </div>
+          <div class="scenario-legend" id="scenario-legend"></div>
         </div>
       </div>
     </div>
