@@ -1263,7 +1263,7 @@
           <h2 class="card-title">Model overview</h2>
         </div>
         <div class="card-body">
-          <p>"Ursus" (latin for bear) is an interactive tool to perform a cost-benefit analysis of preventive measures for bear-caused damage in the Italian Apennines region, particularly in the area of influence of the NGO Salviamo l'orso.</p>
+          <p>"Ursus" (latin for bear) is an interactive tool to perform a cost-benefit analysis of preventive measures for bear-caused damage in the Italian Apennines region, particularly in the area of influence of the NGO Rewilding Apennines.</p>
           <p>The tool always compares two different scenarios: <strong>no protective measures implemented</strong> 
             and <strong>protective measures are implemented</strong>. Both scenarios assume the compensation policy currently in place, in which residents and farmers can claim monetary
             compensation if they have suffered property loss or damage due to a bear.
@@ -1279,7 +1279,7 @@
           <h2 class="card-title">How to use the tool</h2>
         </div>
         <div class="card-body">
-          <p>The tool is based on default values that were sourced through communication with experts and official data from Salviamo l'Orso and Parco Nazionale d'Abruzzo.
+          <p>The tool is based on default values that were sourced through communication with experts, internal information from Rewilding Apennines and official information from Parco Nazionale d'Abruzzo, Lazio e Molise.
             This values are shown in the "Data Source" page.</p>
             <p>For ease of use, we have created two different viewing modes of the model. The complete view includes sliders for all variable that are evaluated.
               In that sense, it is more complex to use but also offers more precise scenarios.</p>
@@ -1317,7 +1317,7 @@
     <div class="footer-main">
       <p>Developed as part of the <em>Participatory Environmental Modelling</em> course at ETH Z&uuml;rich.</p>
       <p>Credits: Ricardo P&eacute;rez-Restrepo, Anna Minor, Peppino M&uuml;ller and Alessandra Ciampi</p>
-      <p>We&rsquo;d like to thank <strong>Salviamo l&rsquo;Orso</strong>, and particularly Paula Meyer and Berenice Guinel, for their help and inputs in developing this tool.</p>
+      <p>We&rsquo;d like to thank <strong>Rewilding Apennines</strong>, and particularly Paula Meyer and Berenice Guinel, for their help and inputs in developing this tool.</p>
       <p>Contact: <a href="mailto:perez-restrepo@ibi.baug.ethz.ch">perez-restrepo@ibi.baug.ethz.ch</a> &middot; 05.2026</p>
     </div>
       </div>
@@ -1771,15 +1771,15 @@ function recomputeScenarioCard() {
       <td class="value">${fmtMoney(sumProtPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Losses from unprotected units</td>
+      <td class="label indent">-Losses from unprotected units (Compensation)</td>
       <td class="value">${fmtMoney(sumUnprotPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Losses from non-maintained infrastructure</td>
+      <td class="label indent">-Losses from non-maintained infrastructure</td>
       <td class="value">${fmtMoney(sumResidualPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Maintenance</td>
+      <td class="label indent">-Maintenance</td>
       <td class="value">${fmtMoney(sumMaintPerYr)} / yr</td>
     </tr>
     <tr>
@@ -1787,11 +1787,11 @@ function recomputeScenarioCard() {
       <td class="value">${fmtMoney(sumInstallCycle)}</td>
     </tr>
     <tr>
-      <td class="label">Cumulative — no protection</td>
+      <td class="label">Cumulative, no protection</td>
       <td class="value loss">${fmtMoney(cumNoProt)}</td>
     </tr>
     <tr>
-      <td class="label">Cumulative — with protection</td>
+      <td class="label">Cumulative, with protection</td>
       <td class="value">${fmtMoney(cumProt)}</td>
     </tr>
     <tr>
@@ -2324,15 +2324,15 @@ function mountModel(scope) {
           <td class="value">${fmtMoney(m.protPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Losses from unprotected units</td>
+          <td class="label indent">-Losses from unprotected units (Compensation)</td>
           <td class="value">${fmtMoney(m.unprotPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Losses from non-maintained infrastructure</td>
+          <td class="label indent">-Losses from non-maintained infrastructure</td>
           <td class="value">${fmtMoney(m.residualPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Maintenance</td>
+          <td class="label indent">-Maintenance</td>
           <td class="value">${fmtMoney(m.maintPerYr)} / yr</td>
         </tr>
         <tr>
@@ -2340,11 +2340,11 @@ function mountModel(scope) {
           <td class="value">${fmtMoney(m.installYr0)}</td>
         </tr>
         <tr>
-          <td class="label">Cumulative — no protection</td>
+          <td class="label">Cumulative, no protection</td>
           <td class="value loss">${fmtMoney(cumNoProt)}</td>
         </tr>
         <tr>
-          <td class="label">Cumulative — with protection</td>
+          <td class="label">Cumulative, with protection</td>
           <td class="value">${fmtMoney(cumProt)}</td>
         </tr>
         <tr>

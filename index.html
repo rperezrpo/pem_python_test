@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Bear Attack Cost-Benefit Model</title>
+<title>Cost-benefit Model of BearSmart Measures</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,9 +46,9 @@
   html[data-theme="light"] {
     color-scheme: light;
 
-    --bg:           #f7f0dc;
-    --panel:        #fffaea;
-    --panel-2:      #d5e2d1;
+    --bg:           #fdf8e9;
+    --panel:        #f9f7ef;
+    --panel-2:      #faf2df;
     --ink:          #221f16;
     --ink-dim:      #6e6754;
     --ink-strong:   #14110a;
@@ -305,6 +305,54 @@
   }
   .page { display: none; }
   .page.active { display: block; }
+
+  /* ====== Scenario summary card chart + legend ====== */
+  .scenario-results-grid { align-items: stretch; }
+  .scenario-chart-stack {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 360px;
+  }
+  .scenario-chart-box {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+  .scenario-legend {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 18px;
+    padding-top: 16px;
+    margin-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .scenario-legend-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .scenario-legend-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 4px;
+  }
+  .scenario-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .scenario-legend-sample {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+  }
 
   /* ====== Scenarios page ====== */
   .scenario-rows {
@@ -743,6 +791,15 @@
     align-items: baseline;
     margin-bottom: 20px;
   }
+  .card-head-with-action {
+    align-items: center;
+    gap: 16px;
+  }
+  .card-head-with-action > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
   .card-title {
     font-family: 'Fraunces', serif;
     font-size: 22px;
@@ -991,8 +1048,8 @@
 <div class="wrap">
   <header>
     <div>
-      <h1>To <em>protect</em>,<br>or to compensate?</h1>
-      <p class="subtitle">An interactive cost benefit analysis of the trade-off between investing in protective infrastructure and paying compensation for bear-caused damages.</p>
+      <h1>Protect or compensate?</h1>
+      <p class="subtitle">An interactive cost-benefit analysis between protective infrastructure and paying compensation for bear-caused damages.</p>
     </div>
     <div class="header-side">
       <div class="verdict">
@@ -1006,9 +1063,12 @@
   <!-- Page: Variables table -->
   <section class="page" id="page-table">
     <div class="card">
-      <div class="card-head">
-        <h2 class="card-title">Model variables</h2>
-        <span class="card-sub">Sourced from bear_attack_model_variables.xlsx</span>
+      <div class="card-head card-head-with-action">
+        <div>
+          <h2 class="card-title">Model variables</h2>
+          <span class="card-sub">Sourced from bear_attack_model_variables.xlsx</span>
+        </div>
+        <button class="reset-btn" id="table-reset-all" type="button">Reset all to defaults</button>
       </div>
       <div class="variables-table-wrap">
         <table id="variables-table">
@@ -1179,14 +1239,17 @@
         <h2 class="card-title">Scenario summary</h2>
         <span class="card-sub" id="scenario-card-sub">Per-year &middot; EUR</span>
       </div>
-      <div class="element-results-grid">
+      <div class="element-results-grid scenario-results-grid">
         <div>
           <table class="metric-table">
             <tbody id="scenario-metrics"></tbody>
           </table>
         </div>
-        <div class="chart-box">
-          <canvas id="scenarioChart"></canvas>
+        <div class="scenario-chart-stack">
+          <div class="chart-box scenario-chart-box">
+            <canvas id="scenarioChart"></canvas>
+          </div>
+          <div class="scenario-legend" id="scenario-legend"></div>
         </div>
       </div>
     </div>
@@ -1200,7 +1263,7 @@
           <h2 class="card-title">Model overview</h2>
         </div>
         <div class="card-body">
-          <p>"Ursus" (latin for bear) is an interactive tool to perform a cost-benefit analysis of preventive measures for bear-caused damage in the Italian Apennines region, particularly in the area of influence of the NGO Salviamo l'orso.</p>
+          <p>"Ursus" (latin for bear) is an interactive tool to perform a cost-benefit analysis of preventive measures for bear-caused damage in the Italian Apennines region, particularly in the area of influence of the NGO Rewilding Apennines.</p>
           <p>The tool always compares two different scenarios: <strong>no protective measures implemented</strong> 
             and <strong>protective measures are implemented</strong>. Both scenarios assume the compensation policy currently in place, in which residents and farmers can claim monetary
             compensation if they have suffered property loss or damage due to a bear.
@@ -1216,7 +1279,7 @@
           <h2 class="card-title">How to use the tool</h2>
         </div>
         <div class="card-body">
-          <p>The tool is based on default values that were sourced through communication with experts and official data from Salviamo l'Orso and Parco Nazionale d'Abruzzo.
+          <p>The tool is based on default values that were sourced through communication with experts, internal information from Rewilding Apennines and official information from Parco Nazionale d'Abruzzo, Lazio e Molise.
             This values are shown in the "Data Source" page.</p>
             <p>For ease of use, we have created two different viewing modes of the model. The complete view includes sliders for all variable that are evaluated.
               In that sense, it is more complex to use but also offers more precise scenarios.</p>
@@ -1254,7 +1317,7 @@
     <div class="footer-main">
       <p>Developed as part of the <em>Participatory Environmental Modelling</em> course at ETH Z&uuml;rich.</p>
       <p>Credits: Ricardo P&eacute;rez-Restrepo, Anna Minor, Peppino M&uuml;ller and Alessandra Ciampi</p>
-      <p>We&rsquo;d like to thank <strong>Salviamo l&rsquo;Orso</strong>, and particularly Paula Meyer and Berenice Guinel, for their help and inputs in developing this tool.</p>
+      <p>We&rsquo;d like to thank <strong>Rewilding Apennines</strong>, and particularly Paula Meyer and Berenice Guinel, for their help and inputs in developing this tool.</p>
       <p>Contact: <a href="mailto:perez-restrepo@ibi.baug.ethz.ch">perez-restrepo@ibi.baug.ethz.ch</a> &middot; 05.2026</p>
     </div>
       </div>
@@ -1497,29 +1560,39 @@ const SCENARIO_ROWS = [
 // Each level is a factor window applied to the variable's *default* value.
 // e.g. low picks a value in [0.10, 0.70] × default, clamped/snapped to slider bounds.
 const SCENARIO_LEVELS = {
-  low:    { factor: [0.10, 0.70] },
-  middle: { factor: [0.71, 1.40] },
-  high:   { factor: [1.41, 2.00] },
+  low:    { factor: [0, 0.70] },
+  middle: { factor: [0.70001, 1.40] },
+  high:   { factor: [1.40001, 2.00] },
 };
-
-function snapToStep(value, cfg) {
-  const stepped = Math.round((value - cfg.min) / cfg.step) * cfg.step + cfg.min;
-  return Math.max(cfg.min, Math.min(cfg.max, stepped));
-}
 
 function defaultValueFor(key) {
   const v = DEFAULTS.find(d => d.notation === key);
   return v ? Number(v.value) : null;
 }
 
+// Round to the slider's step for clean values, but keep the result inside the
+// band's factor window — otherwise step rounding can push a value past the
+// band's edge (e.g. raw 70.5 → 70, where 70/50 = 1.40 < high.lo = 1.41) and
+// the factor-based active check stops matching the button that was clicked.
 function pickInBand(key, level) {
   const cfg = SLIDER_CONFIG[key];
   if (!cfg) return null;
   const def = defaultValueFor(key);
-  if (def === null) return null;
+  if (def === null || def === 0) return null;
   const [lo, hi] = SCENARIO_LEVELS[level].factor;
   const factor = lo + Math.random() * (hi - lo);
-  return snapToStep(def * factor, cfg);
+  const raw = def * factor;
+  // Smallest / largest step-aligned values that still fall inside the band.
+  const stepLow  = Math.ceil((lo * def - cfg.min) / cfg.step) * cfg.step + cfg.min;
+  const stepHigh = Math.floor((hi * def - cfg.min) / cfg.step) * cfg.step + cfg.min;
+  if (stepHigh < stepLow) {
+    // Band is narrower than one step — pick the closer of the two endpoints.
+    return Math.abs(raw - stepLow) <= Math.abs(raw - stepHigh) ? stepLow : stepHigh;
+  }
+  let rounded = Math.round((raw - cfg.min) / cfg.step) * cfg.step + cfg.min;
+  if (rounded < stepLow)  rounded = stepLow;
+  if (rounded > stepHigh) rounded = stepHigh;
+  return rounded;
 }
 
 function applyScenario(rowId, level) {
@@ -1562,7 +1635,7 @@ function mountScenarioCard() {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'bottom', labels: lineLegendLabels },
+        legend: { display: false },
         tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtMoney(ctx.raw) } }
       },
       scales: {
@@ -1572,6 +1645,72 @@ function mountScenarioCard() {
       elements: { point: { radius: 2, hoverRadius: 5 }, line: { borderWidth: 2, tension: 0 } }
     }
   });
+}
+
+// Smaller line sample for the custom scenario legend (2/3 of the default).
+function scenarioLegendSwatch(color, dash = [], lineWidth = 2, fill = false) {
+  const width = 28;
+  const height = 10;
+  const inset = 2;
+  const scale = window.devicePixelRatio || 1;
+  const canvas = document.createElement('canvas');
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  if (fill) {
+    ctx.fillStyle = color + '40';
+    ctx.fillRect(0, height / 2, width - inset, height / 2);
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.lineCap = 'butt';
+  ctx.setLineDash(dash);
+  ctx.beginPath();
+  ctx.moveTo(0, height / 2);
+  ctx.lineTo(width - inset, height / 2);
+  ctx.stroke();
+  return canvas;
+}
+
+function renderScenarioLegend(elements) {
+  const root = document.getElementById('scenario-legend');
+  if (!root) return;
+  root.innerHTML = '';
+  elements.forEach(({name, color}) => {
+    const col = document.createElement('div');
+    col.className = 'scenario-legend-col';
+    col.innerHTML = `
+      <div class="scenario-legend-title">${name}</div>
+      <div class="scenario-legend-item">
+        <span class="scenario-legend-sample" data-kind="dashed"></span>
+        <span>Without protection</span>
+      </div>
+      <div class="scenario-legend-item">
+        <span class="scenario-legend-sample" data-kind="solid"></span>
+        <span>With protection</span>
+      </div>
+    `;
+    col.querySelector('[data-kind="dashed"]').appendChild(scenarioLegendSwatch(color, [5, 3]));
+    col.querySelector('[data-kind="solid"]').appendChild(scenarioLegendSwatch(color, []));
+    root.appendChild(col);
+  });
+  const grayColor = cssVar('--ink-dim');
+  const netCol = document.createElement('div');
+  netCol.className = 'scenario-legend-col';
+  netCol.innerHTML = `
+    <div class="scenario-legend-title">Net Benefit</div>
+    <div class="scenario-legend-item">
+      <span class="scenario-legend-sample" data-kind="net"></span>
+      <span>Net benefit</span>
+    </div>
+  `;
+  netCol.querySelector('[data-kind="net"]').appendChild(
+    scenarioLegendSwatch(grayColor, [2, 3], 1.5, true)
+  );
+  root.appendChild(netCol);
 }
 
 function recomputeScenarioCard() {
@@ -1632,15 +1771,15 @@ function recomputeScenarioCard() {
       <td class="value">${fmtMoney(sumProtPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Losses from unprotected units</td>
+      <td class="label indent">-Losses from unprotected units (Compensation)</td>
       <td class="value">${fmtMoney(sumUnprotPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Losses from non-maintained infrastructure</td>
+      <td class="label indent">-Losses from non-maintained infrastructure</td>
       <td class="value">${fmtMoney(sumResidualPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Maintenance</td>
+      <td class="label indent">-Maintenance</td>
       <td class="value">${fmtMoney(sumMaintPerYr)} / yr</td>
     </tr>
     <tr>
@@ -1648,11 +1787,11 @@ function recomputeScenarioCard() {
       <td class="value">${fmtMoney(sumInstallCycle)}</td>
     </tr>
     <tr>
-      <td class="label">Cumulative — no protection</td>
+      <td class="label">Cumulative, no protection</td>
       <td class="value loss">${fmtMoney(cumNoProt)}</td>
     </tr>
     <tr>
-      <td class="label">Cumulative — with protection</td>
+      <td class="label">Cumulative, with protection</td>
       <td class="value">${fmtMoney(cumProt)}</td>
     </tr>
     <tr>
@@ -1679,7 +1818,7 @@ function recomputeScenarioCard() {
       cumNoProt.push(rn); cumProt.push(rp);
     }
     datasets.push({
-      label: `${name} — no protection`,
+      label: `${name} — without protection`,
       data: cumNoProt,
       borderColor: color,
       backgroundColor: color + '14',
@@ -1696,7 +1835,7 @@ function recomputeScenarioCard() {
   });
   const grayColor = cssVar('--ink-dim');
   datasets.push({
-    label: 'Net benefit (no-prot − prot)',
+    label: 'Net benefit',
     data: cumNetSeries,
     borderColor: grayColor,
     backgroundColor: grayColor + '26',
@@ -1708,6 +1847,7 @@ function recomputeScenarioCard() {
   scenarioChart.data.labels = labels;
   scenarioChart.data.datasets = datasets;
   scenarioChart.update();
+  renderScenarioLegend(elements);
 }
 
 function buildScenariosPage() {
@@ -2184,15 +2324,15 @@ function mountModel(scope) {
           <td class="value">${fmtMoney(m.protPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Losses from unprotected units</td>
+          <td class="label indent">-Losses from unprotected units (Compensation)</td>
           <td class="value">${fmtMoney(m.unprotPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Losses from non-maintained infrastructure</td>
+          <td class="label indent">-Losses from non-maintained infrastructure</td>
           <td class="value">${fmtMoney(m.residualPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Maintenance</td>
+          <td class="label indent">-Maintenance</td>
           <td class="value">${fmtMoney(m.maintPerYr)} / yr</td>
         </tr>
         <tr>
@@ -2200,11 +2340,11 @@ function mountModel(scope) {
           <td class="value">${fmtMoney(m.installYr0)}</td>
         </tr>
         <tr>
-          <td class="label">Cumulative — no protection</td>
+          <td class="label">Cumulative, no protection</td>
           <td class="value loss">${fmtMoney(cumNoProt)}</td>
         </tr>
         <tr>
-          <td class="label">Cumulative — with protection</td>
+          <td class="label">Cumulative, with protection</td>
           <td class="value">${fmtMoney(cumProt)}</td>
         </tr>
         <tr>
@@ -2380,6 +2520,8 @@ if (themeToggle) {
 // === Init ===
 setupTabs();
 buildVariablesTable();
+const tableResetBtn = document.getElementById('table-reset-all');
+if (tableResetBtn) tableResetBtn.addEventListener('click', resetAll);
 buildScenariosPage();
 mountScenarioCard();
 mountModel('cm');

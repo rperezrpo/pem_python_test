@@ -12,7 +12,7 @@ HTML_PATH = Path("source/bear_cost_benefit.html")
 
 def read_variables(path: Path):
     wb = load_workbook(path)
-    ws = wb.active
+    ws = wb["default_general"]
     rows = []
     for r in range(2, ws.max_row + 1):
         name = ws.cell(row=r, column=1).value

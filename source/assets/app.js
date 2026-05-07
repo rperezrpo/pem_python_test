@@ -445,15 +445,15 @@ function recomputeScenarioCard() {
       <td class="value">${fmtMoney(sumProtPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Losses from unprotected units</td>
+      <td class="label indent">-Losses from unprotected units (Compensation)</td>
       <td class="value">${fmtMoney(sumUnprotPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Losses from non-maintained infrastructure</td>
+      <td class="label indent">-Losses from non-maintained infrastructure</td>
       <td class="value">${fmtMoney(sumResidualPerYr)} / yr</td>
     </tr>
     <tr>
-      <td class="label indent">— Maintenance</td>
+      <td class="label indent">-Maintenance</td>
       <td class="value">${fmtMoney(sumMaintPerYr)} / yr</td>
     </tr>
     <tr>
@@ -461,11 +461,11 @@ function recomputeScenarioCard() {
       <td class="value">${fmtMoney(sumInstallCycle)}</td>
     </tr>
     <tr>
-      <td class="label">Cumulative — no protection</td>
+      <td class="label">Cumulative, no protection</td>
       <td class="value loss">${fmtMoney(cumNoProt)}</td>
     </tr>
     <tr>
-      <td class="label">Cumulative — with protection</td>
+      <td class="label">Cumulative, with protection</td>
       <td class="value">${fmtMoney(cumProt)}</td>
     </tr>
     <tr>
@@ -998,15 +998,15 @@ function mountModel(scope) {
           <td class="value">${fmtMoney(m.protPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Losses from unprotected units</td>
+          <td class="label indent">-Losses from unprotected units (Compensation)</td>
           <td class="value">${fmtMoney(m.unprotPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Losses from non-maintained infrastructure</td>
+          <td class="label indent">-Losses from non-maintained infrastructure</td>
           <td class="value">${fmtMoney(m.residualPerYr)} / yr</td>
         </tr>
         <tr>
-          <td class="label indent">— Maintenance</td>
+          <td class="label indent">-Maintenance</td>
           <td class="value">${fmtMoney(m.maintPerYr)} / yr</td>
         </tr>
         <tr>
@@ -1014,11 +1014,11 @@ function mountModel(scope) {
           <td class="value">${fmtMoney(m.installYr0)}</td>
         </tr>
         <tr>
-          <td class="label">Cumulative — no protection</td>
+          <td class="label">Cumulative, no protection</td>
           <td class="value loss">${fmtMoney(cumNoProt)}</td>
         </tr>
         <tr>
-          <td class="label">Cumulative — with protection</td>
+          <td class="label">Cumulative, with protection</td>
           <td class="value">${fmtMoney(cumProt)}</td>
         </tr>
         <tr>
